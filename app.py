@@ -29,7 +29,7 @@ st.set_page_config(page_title="Cadeia de IA 2026", page_icon="🧭", layout="wid
 st.markdown("""
 <style>
 [data-testid="stSidebar"], [data-testid="collapsedControl"] { display: none; }
-.block-container { padding-top: 3.2rem; padding-bottom: 0; max-width: 1680px; }
+.block-container { padding-top: 3.2rem; padding-bottom: 0; padding-left: 1rem; padding-right: 1rem; max-width: none; }
 header[data-testid="stHeader"] { background: transparent; }
 </style>
 """, unsafe_allow_html=True)
