@@ -16,13 +16,13 @@
   --us: #6ea6ea; --tw: #4fc9a5; --kr: #e08ab8; --jp: #e9b460; --cn: #ef8a8a; --eu: #a3a6f0; --priv: #a0a8b5; color-scheme: dark; }
 body { background: var(--bg); color: var(--fg); font-family: var(--sans); font-size: 15px; line-height: 1.5; margin: 0; padding-block: 0 48px; padding-inline: 16px; }
 .wrap { max-width: 2000px; margin: 0 auto; }
-header.hdr { padding-block: 22px 6px; display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
+header.hdr { padding-block: 22px 6px; display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
 .hdr-t { flex: 1 1 420px; min-width: 0; }
-.hdr .tiles { flex: 1 1 560px; margin: 0; max-width: none; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+.hdr .tiles { flex: 1 1 560px; margin: 0; max-width: none; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
 @media (min-width: 1150px) { .hdr .tiles { grid-template-columns: repeat(5, minmax(0, 1fr)); } .hdr-t { flex: 0 1 520px; } }
-.hdr .tile { padding: 8px 10px; }
-.hdr .tile .n { font-size: 1.05rem; white-space: nowrap; }
-.hdr .tile .l { font-size: 0.64rem; line-height: 1.2; }
+.hdr .tile { padding: 16px 16px 14px; display: flex; flex-direction: column; justify-content: center; min-height: 96px; }
+.hdr .tile .n { font-size: 1.6rem; white-space: nowrap; margin-bottom: 4px; }
+.hdr .tile .l { font-size: 0.7rem; line-height: 1.3; }
 .tabs { display: flex; gap: 10px; margin: 10px 0 14px; }
 .tab { font: inherit; font-size: 1.05rem; font-weight: 600; padding: 12px 26px; border: 2px solid var(--accent); border-radius: 10px; background: var(--paper); color: var(--accent); cursor: pointer; }
 .tab.on { background: var(--accent); color: var(--accent-ink); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }

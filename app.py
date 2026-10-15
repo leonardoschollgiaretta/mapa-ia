@@ -51,9 +51,14 @@ _PROTO = """
 <script>
 (function(){
   function msg(type, data){ window.parent.postMessage(Object.assign({isStreamlitMessage: true, type: type}, data || {}), "*"); }
+  var ultimo = 0;
   function send(){
-    var h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight) + 24;
-    msg("streamlit:setFrameHeight", {height: h});
+    // mede o CONTEÚDO (.wrap), não o documento: o documento sempre preenche
+    // o iframe, e medir ele cria um laço em que a altura cresce sem parar.
+    var w = document.querySelector(".wrap"); if (!w) return;
+    var h = Math.ceil(w.getBoundingClientRect().bottom + window.scrollY) + 24;
+    if (Math.abs(h - ultimo) < 3) return;
+    ultimo = h; msg("streamlit:setFrameHeight", {height: h});
   }
   var t = null; function agendar(){ clearTimeout(t); t = setTimeout(send, 60); }
   msg("streamlit:componentReady", {apiVersion: 1});
@@ -70,7 +75,7 @@ os.makedirs(_COMP_DIR, exist_ok=True)
 with open(os.path.join(_COMP_DIR, "index.html"), "w", encoding="utf-8") as f:
     f.write('<!doctype html><html><head><meta charset="utf-8">'
             '<meta name="viewport" content="width=device-width, initial-scale=1">'
-            '<style>html,body{margin:0;background:#f4f5f7;overflow:hidden}</style></head><body>'
+            '<style>html,body{margin:0;height:auto;background:#f4f5f7;overflow:hidden}</style></head><body>'
             + html + _PROTO + '</body></html>')
 
 _mapa = components.declare_component("mapa_ia", path=_COMP_DIR)
