@@ -19,9 +19,10 @@ body { background: var(--bg); color: var(--fg); font-family: var(--sans); font-s
 header.hdr { padding-block: 22px 6px; display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
 .hdr-t { flex: 1 1 420px; min-width: 0; }
 .hdr .tiles { flex: 1 1 560px; margin: 0; max-width: none; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+@media (min-width: 1150px) { .hdr .tiles { grid-template-columns: repeat(5, minmax(0, 1fr)); } .hdr-t { flex: 0 1 520px; } }
 .hdr .tile { padding: 8px 10px; }
-.hdr .tile .n { font-size: 1.15rem; }
-.hdr .tile .l { font-size: 0.68rem; line-height: 1.25; }
+.hdr .tile .n { font-size: 1.05rem; white-space: nowrap; }
+.hdr .tile .l { font-size: 0.64rem; line-height: 1.2; }
 .tabs { display: flex; gap: 10px; margin: 10px 0 14px; }
 .tab { font: inherit; font-size: 1.05rem; font-weight: 600; padding: 12px 26px; border: 2px solid var(--accent); border-radius: 10px; background: var(--paper); color: var(--accent); cursor: pointer; }
 .tab.on { background: var(--accent); color: var(--accent-ink); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
