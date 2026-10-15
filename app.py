@@ -85,9 +85,15 @@ _mapa(key="mapa_ia")
 if st.query_params.get("admin") == "1":
     r = acessos.resumo(PAGINA)
     with st.expander("Acessos", expanded=True):
-        if not r:
-            st.warning("Contador indisponível: sem banco configurado "
-                       "(postgres_url nos secrets) ou erro de conexão.")
+        if not r or r.get("erro"):
+            st.warning("Contador indisponível.")
+            if r:
+                st.code(f"banco: {r['onde']} | host: {r.get('host')}
+{r['erro']}", language="text")
+                if "pooler" not in str(r.get("host", "")) and r["onde"] == "pg":
+                    st.info("A URL do Supabase precisa ser a do Session pooler "
+                            "(host com 'pooler.supabase.com', porta 6543). A URL direta "
+                            "só responde em IPv6 e o Streamlit Cloud é IPv4.")
         else:
             c1, c2, c3 = st.columns(3)
             c1.metric("Visitas (total)", r["total"])

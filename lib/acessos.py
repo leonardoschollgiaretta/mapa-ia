@@ -14,6 +14,7 @@ visitantes distintos por dia sem identificar ninguém.
 """
 import hashlib
 import os
+import re
 import sqlite3
 from datetime import datetime, timezone
 
@@ -42,6 +43,15 @@ def _url_postgres():
     except Exception:
         pass
     return None
+
+
+def _host_seguro():
+    """Só o host e a porta da URL do Postgres, para diagnóstico (sem senha)."""
+    u = _url_postgres()
+    if not u:
+        return "sem postgres_url (SQLite)"
+    m = re.search(r"@([^/:?]+)(?::(\d+))?", u)
+    return (m.group(1) + (":" + m.group(2) if m.group(2) else "")) if m else "url sem host"
 
 
 def _conectar():
@@ -124,5 +134,9 @@ def resumo(pagina):
         ult7 = sum(r[1] for r in linhas
                    if (hoje - datetime.strptime(r[0], "%Y-%m-%d").date()).days < 7)
         return {"total": total, "ult7": ult7, "dias": linhas, "onde": tipo}
-    except Exception:
-        return None
+    except Exception as e:
+        # devolve o erro sem a URL (que contém a senha)
+        msg = re.sub(r"postgres(ql)?://\S+", "postgres://***", str(e))
+        return {"erro": f"{type(e).__name__}: {msg[:300]}",
+                "onde": "pg" if _url_postgres() else "sqlite",
+                "host": _host_seguro()}
