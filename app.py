@@ -43,12 +43,31 @@ except OSError:
     st.error("Arquivo do mapa não encontrado (static/mapa_cadeia_ia_2026.html).")
     st.stop()
 
+# O iframe avisa o Streamlit da altura real do conteúdo (protocolo dos
+# componentes), então não há rolagem interna: só a rolagem da página.
+_AUTOSIZE = """
+<script>
+(function(){
+  function send(){
+    var h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight) + 16;
+    window.parent.postMessage({isStreamlitMessage: true, type: "streamlit:setFrameHeight", height: h}, "*");
+  }
+  var t = null; function agendar(){ clearTimeout(t); t = setTimeout(send, 60); }
+  window.addEventListener("load", function(){ send(); setTimeout(send, 400); setTimeout(send, 1500); });
+  window.addEventListener("resize", agendar);
+  document.addEventListener("click", function(){ setTimeout(send, 80); setTimeout(send, 400); });
+  if (window.ResizeObserver) new ResizeObserver(agendar).observe(document.body);
+  if (window.MutationObserver) new MutationObserver(agendar).observe(document.body, {childList: true, subtree: true, attributes: true});
+})();
+</script>
+"""
+
 components.html(
     '<!doctype html><html><head><meta charset="utf-8">'
     '<meta name="viewport" content="width=device-width, initial-scale=1">'
-    '<style>html,body{margin:0;background:#f4f5f7}</style></head><body>'
-    + html + '</body></html>',
-    height=2700, scrolling=True,
+    '<style>html,body{margin:0;background:#f4f5f7;overflow:hidden}</style></head><body>'
+    + html + _AUTOSIZE + '</body></html>',
+    height=1400, scrolling=False,
 )
 
 # ---------- contador (só com ?admin=1) ----------
