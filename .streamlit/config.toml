@@ -1,0 +1,17 @@
+# Configuração do app publicado (mesmo padrão do site de fundos).
+
+[client]
+# "viewer" tira do menu as opções de desenvolvedor (código-fonte, repositório,
+# gerenciar app). O visitante fica só com o essencial.
+toolbarMode = "viewer"
+# Erro de execução vai só para os logs, não para a tela do visitante.
+showErrorDetails = false
+
+[theme]
+base = "light"
+primaryColor = "#184c8c"
+backgroundColor = "#f4f5f7"
+secondaryBackgroundColor = "#ffffff"
+
+[browser]
+gatherUsageStats = false

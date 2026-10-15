@@ -1,0 +1,4 @@
+# Versões travadas na major que roda localmente (ver site/requirements.txt).
+streamlit>=1.51,<2
+pandas>=2.3,<3
+psycopg[binary]>=3.2,<4

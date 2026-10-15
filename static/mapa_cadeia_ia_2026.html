@@ -1,0 +1,784 @@
+<title>Cadeia de IA 2026</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: mapa em colunas por elo da cadeia (SVG com fluxos), seguido de tabelas por elo, rankings e lista de acordos. */
+:root {
+  --bg: #f4f5f7; --paper: #ffffff; --fg: #1b2230; --muted: #5f6b7a; --line: #d8dde5;
+  --accent: #184c8c; --accent-ink: #ffffff; --flow: #7a8aa0; --flowhi: #c2410c;
+  --us: #2b5fb3; --tw: #0e8f6e; --kr: #b23b7a; --jp: #c9821a; --cn: #b83a3a; --eu: #5b5fb5; --priv: #6b7280;
+  --sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif; --mono: "IBM Plex Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #12161c; --paper: #1a2029; --fg: #e6e9ee; --muted: #9aa5b4; --line: #2d3540; --accent: #6ea6ea; --accent-ink: #0f1620; --flow: #6b7a8f; --flowhi: #f59e5b;
+  --us: #6ea6ea; --tw: #4fc9a5; --kr: #e08ab8; --jp: #e9b460; --cn: #ef8a8a; --eu: #a3a6f0; --priv: #a0a8b5; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #12161c; --paper: #1a2029; --fg: #e6e9ee; --muted: #9aa5b4; --line: #2d3540; --accent: #6ea6ea; --accent-ink: #0f1620; --flow: #6b7a8f; --flowhi: #f59e5b;
+  --us: #6ea6ea; --tw: #4fc9a5; --kr: #e08ab8; --jp: #e9b460; --cn: #ef8a8a; --eu: #a3a6f0; --priv: #a0a8b5; color-scheme: dark; }
+body { background: var(--bg); color: var(--fg); font-family: var(--sans); font-size: 15px; line-height: 1.5; margin: 0; padding-block: 0 48px; padding-inline: 16px; }
+.wrap { max-width: 1560px; margin: 0 auto; }
+header.hdr { padding-block: 22px 6px; display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
+.hdr-t { flex: 1 1 420px; min-width: 0; }
+.hdr .tiles { flex: 1 1 560px; margin: 0; max-width: none; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+.hdr .tile { padding: 8px 10px; }
+.hdr .tile .n { font-size: 1.15rem; }
+.hdr .tile .l { font-size: 0.68rem; line-height: 1.25; }
+.tabs { display: flex; gap: 10px; margin: 10px 0 14px; }
+.tab { font: inherit; font-size: 1.05rem; font-weight: 600; padding: 12px 26px; border: 2px solid var(--accent); border-radius: 10px; background: var(--paper); color: var(--accent); cursor: pointer; }
+.tab.on { background: var(--accent); color: var(--accent-ink); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+.tab:hover:not(.on) { background: var(--barc); }
+.tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+h1 { font-size: 1.55rem; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.01em; text-wrap: balance; }
+h2 { font-size: 1.15rem; font-weight: 600; margin: 34px 0 8px; }
+h3 { font-size: 1rem; font-weight: 600; margin: 18px 0 6px; color: var(--accent); }
+.sub { color: var(--muted); margin: 0; max-width: 70ch; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin: 18px 0; max-width: 1180px; }
+.tile { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; min-width: 0; }
+.tile .n { font-family: var(--mono); font-size: 1.35rem; font-weight: 500; font-variant-numeric: tabular-nums; }
+.tile .l { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 14px; font-size: 0.82rem; color: var(--muted); margin: 8px 0; }
+.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; background: var(--c); }
+.filters { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+.filters button { font: inherit; font-size: 0.82rem; padding: 5px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--paper); color: var(--fg); cursor: pointer; }
+.filters button.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.filters button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mapbox { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; overflow-x: auto; padding: 8px; }
+svg { display: block; min-width: 820px; width: 100%; height: auto; font-family: var(--sans); }
+.node rect { fill: var(--paper); stroke-width: 1.6; }
+.node text { font-size: 11px; fill: var(--fg); }
+.node .cap { font-family: var(--mono); font-size: 9.5px; fill: var(--muted); }
+.node.dim { opacity: 0.25; }
+.col-title { font-size: 11.5px; font-weight: 600; fill: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
+.flow { fill: none; stroke: var(--flow); stroke-opacity: 0.35; stroke-width: 1.4; }
+.flow.hi { stroke: var(--flowhi); stroke-opacity: 0.95; stroke-width: 2.4; }
+.flow.dim { stroke-opacity: 0.06; }
+.flowlabel { font-family: var(--mono); font-size: 9px; fill: var(--flowhi); paint-order: stroke; stroke: var(--paper); stroke-width: 3px; }
+.maprow { display: flex; gap: 12px; align-items: flex-start; width: 100%; }
+.maprow .mapbox { flex: 1 1 0; min-width: 0; }
+.callout { background: var(--barc); border-left: 4px solid var(--accent); border-radius: 6px; padding: 8px 12px; font-size: 0.9rem; margin: 6px 0 8px; }
+.panel.empty { border: 2px dashed var(--accent); }
+.panel { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; flex: 0 0 300px; max-height: calc(100vh - 24px); overflow-y: auto; position: sticky; top: env(safe-area-inset-top, 0px); }
+@media (max-width: 1000px) { .maprow { flex-direction: column; } .panel { flex: none; width: 100%; position: static; max-height: none; } }
+.ph { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
+.btn-x { font: inherit; font-size: 0.8rem; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--fg); cursor: pointer; }
+.pbody { font-size: 0.88rem; color: var(--muted); }
+.rel { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 8px; }
+
+.rel .it { border: 1px solid var(--line); border-left: 3px solid var(--flowhi); border-radius: 6px; padding: 8px 10px; color: var(--fg); min-width: 0; }
+.rel .it .who { font-weight: 600; font-size: 0.86rem; }
+.rel .it .val { font-family: var(--mono); font-size: 0.78rem; color: var(--flowhi); margin: 2px 0; }
+.rel .it .d { font-size: 0.78rem; color: var(--muted); line-height: 1.35; }
+.rel .it .x { font-size: 0.84rem; color: var(--fg); line-height: 1.45; margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--line); }
+.node { cursor: pointer; } .node.sel rect { stroke-width: 3; }
+.flow { cursor: pointer; }
+.tm { position: relative; width: 100%; height: 760px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.tm .grp { position: absolute; border: 2px solid var(--bg); box-sizing: border-box; }
+.tm .grp .gt { position: absolute; left: 0; top: 0; right: 0; height: 18px; line-height: 18px; padding-left: 6px; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--fg); background: var(--bg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; z-index: 2; }
+.tm .cell { position: absolute; box-sizing: border-box; border: 1.5px solid var(--paper); overflow: hidden; padding: 4px 5px; color: #fff; cursor: pointer; }
+.tm .cell .nm { font-size: 0.8rem; font-weight: 600; line-height: 1.15; text-shadow: 0 1px 2px rgba(0,0,0,0.45); }
+.tm .cell .vl { font-family: var(--mono); font-size: 0.72rem; opacity: 0.95; text-shadow: 0 1px 2px rgba(0,0,0,0.45); }
+.tm .cell:hover { outline: 2px solid var(--fg); z-index: 3; }
+.filters .lbl { font-size: 0.78rem; color: var(--muted); align-self: center; margin-left: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+.tip { position: fixed; pointer-events: none; background: var(--fg); color: var(--bg); font-size: 0.8rem; padding: 6px 9px; border-radius: 6px; max-width: 320px; z-index: 5; }
+.tablebox { overflow-x: auto; background: var(--paper); border: 1px solid var(--line); border-radius: 8px; }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 760px; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+#rk { min-width: 0; table-layout: auto; font-size: 0.76rem; }
+#rk th, #rk td { padding: 4px 5px; white-space: nowrap; }
+#rk th { font-size: 0.66rem; letter-spacing: 0.03em; }
+#rk td.plano { white-space: normal; font-size: 0.7rem; color: var(--muted); line-height: 1.25; max-width: 190px; }
+#rk td.bar { background-image: linear-gradient(90deg, var(--barc) var(--w), transparent var(--w)); background-repeat: no-repeat; font-weight: 600; }
+#rk td.bar.top { color: var(--accent); }
+:root { --barc: rgba(24,76,140,0.16); --valc: #a8701a; }
+#rk .g-rev { background: rgba(24,76,140,0.045); } #rk .g-res { background: rgba(31,107,58,0.06); } #rk .g-cap { background: rgba(184,137,59,0.07); } #rk .g-bl { background: rgba(120,80,160,0.06); }
+#rk th.gs, #rk td.gs { border-left: 2px solid var(--line); }
+#rk tr.grp th { text-align: center; font-size: 0.64rem; letter-spacing: 0.08em; background: var(--paper); border-bottom: 1px solid var(--line); position: static; }
+#rk td small.per { color: var(--muted); font-size: 0.6rem; margin-left: 3px; }
+#rk td.valp { color: var(--valc); font-weight: 600; font-style: italic; }
+#rk td.valp small { font-weight: 400; font-style: normal; font-size: 0.62rem; margin-left: 3px; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --barc: rgba(110,166,234,0.22); --valc: #e9b460; } }
+:root[data-theme="dark"] { --barc: rgba(110,166,234,0.22); --valc: #e9b460; }
+th.sortable { cursor: pointer; user-select: none; } th.sortable:hover { color: var(--accent); } th.sorted { color: var(--accent); }
+th { font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); font-weight: 600; background: var(--bg); position: sticky; top: 0; }
+td.num, th.num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+td .cc { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; vertical-align: -0px; }
+.note { font-size: 0.82rem; color: var(--muted); max-width: 110ch; }
+.deals td:first-child { white-space: nowrap; }
+details { margin-top: 10px; }
+summary { cursor: pointer; color: var(--accent); }
+.src { font-size: 0.78rem; color: var(--muted); columns: 2; column-gap: 24px; }
+.src a { color: var(--accent); word-break: break-all; }
+@media (max-width: 700px) { .src { columns: 1; } }
+</style>
+
+<div class="wrap">
+<header class="hdr">
+  <div class="hdr-t">
+    <h1>Cadeia de IA em 2026: empresas, receitas e fluxos</h1>
+    <p class="sub">Quem vende para quem, quanto fatura, quanto o mercado projeta e quanto vale, nos EUA, Taiwan, Coreia, Japão, China e Europa. Dados de 14 e 15 de outubro de 2026 (releases, filings e consenso de analistas). Valores em US$ bilhões.</p>
+  </div>
+  <div class="tiles" id="tiles"></div>
+</header>
+
+<nav class="tabs" role="tablist"><button type="button" class="tab on" data-tab="mapa" role="tab">Mapa de relações entre as companhias</button><button type="button" class="tab" data-tab="ranking" role="tab">Ranking</button><button type="button" class="tab" data-tab="tamanho" role="tab">Tamanho das empresas</button></nav>
+<section id="tab-mapa">
+<div class="callout"><b>Clique numa empresa</b> e veja ao lado a explicação das relações dela com as outras. Clique numa seta para ver só aquela relação, ou num botão de grupo para ver a rede inteira. Cada caixa traz o valor de mercado abaixo do nome.</div>
+<div class="legend"><span style="--c:var(--us)">EUA</span><span style="--c:var(--tw)">Taiwan</span><span style="--c:var(--kr)">Coreia</span><span style="--c:var(--jp)">Japão</span><span style="--c:var(--cn)">China</span><span style="--c:var(--eu)">Europa</span><span style="--c:var(--priv)">privada (avaliação)</span></div>
+<div class="filters" id="filters"></div>
+<div class="maprow"><div class="mapbox"><svg id="map" viewBox="0 0 1180 870" role="img" aria-label="Mapa da cadeia de IA com fluxos entre empresas"></svg></div>
+<div class="panel empty" id="panel"><div class="ph"><b id="ptitle">Clique numa empresa e veja aqui as relações dela</b><button type="button" class="btn-x" id="pclose" hidden>Limpar seleção</button></div><div id="pbody" class="pbody">Ao clicar numa caixa do mapa, este painel mostra cada acordo, investimento ou fornecimento daquela empresa, com valor, data e uma explicação em linguagem simples. Clique numa seta para ver só aquela relação. Os botões acima listam as relações de cada grupo.</div></div></div>
+<div class="tip" id="tip" hidden></div>
+
+<h2>Acordos e fluxos documentados</h2>
+<p class="note">Pagador ou comprador à esquerda, recebedor ou fornecedor à direita. Valores em US$ bilhões quando anunciados; GW = capacidade de computação contratada.</p>
+<div class="filters" id="dealfilters"></div>
+<div class="tablebox"><table id="deals" class="deals"></table></div>
+
+<h2>Leitura do mapa</h2>
+<div class="note" id="leitura"></div>
+
+<h2>Glossário rápido</h2>
+<div class="note">
+<p><b>GW (gigawatt):</b> medida de energia usada como régua de tamanho de data center. 1 GW alimenta cerca de 700 mil casas e corresponde a algo entre 400 e 500 mil chips de IA. Um contrato "de 10 GW" é uma encomenda de dez data centers gigantes.</p>
+<p><b>Chip de IA (GPU, acelerador):</b> o processador que faz as contas dos modelos. NVIDIA e AMD vendem chips prontos; Google (TPU), Amazon (Trainium), Meta (MTIA) e OpenAI desenham os próprios, que a Broadcom e a Marvell ajudam a projetar e a TSMC fabrica.</p>
+<p><b>HBM:</b> memória de alta velocidade empilhada em cima do chip de IA. Sem ela o chip não funciona. Só Samsung, SK hynix e Micron fabricam, e a produção de 2026 já está vendida.</p>
+<p><b>Foundry (fundição):</b> fábrica que produz chips desenhados por outros. A TSMC faz isso para quase todo mundo; Samsung e Intel tentam concorrer; SMIC é a opção da China.</p>
+<p><b>EUV:</b> a máquina mais cara da indústria, que grava os circuitos nos chips avançados. Só a ASML fabrica, e a China não pode comprar.</p>
+<p><b>Rack:</b> o armário com dezenas de chips, refrigeração e rede, montado por Foxconn, Quanta, Wiwynn, Dell e Super Micro.</p>
+<p><b>Hyperscaler:</b> as cinco empresas que operam as maiores nuvens e pagam a maior parte da conta: Microsoft, Alphabet, Amazon, Meta e Oracle.</p>
+<p><b>Neocloud:</b> nuvem especializada em alugar chips de IA (CoreWeave, Nebius, Lambda, Crusoe). Compra chips com dívida garantida por contratos de longo prazo.</p>
+<p><b>Capex:</b> dinheiro gasto em construir data centers e comprar chips. <b>Backlog:</b> contratos assinados que ainda não viraram receita. <b>Take-or-pay:</b> o cliente paga mesmo que não use.</p>
+<p><b>PPA:</b> contrato de compra de energia de longo prazo, em geral de 20 anos, que as big techs assinam com usinas nucleares e geradoras para garantir eletricidade aos data centers.</p>
+</div>
+</section>
+<section id="tab-ranking" hidden>
+<h2>Ranking das empresas</h2>
+<p class="note">Clique no cabeçalho de uma coluna para ordenar (clique de novo para inverter). Valores em US$ bilhões. Capex 2026 = guidance da empresa (ponto médio). Backlog = receita contratada ainda não reconhecida ou compromissos de compute assumidos.</p>
+<div class="tablebox"><table id="rk"></table></div>
+<p class="note">Receita (FY) = último ano fiscal fechado, com o período na célula (ex.: "216 26/jan" = ano fiscal encerrado em janeiro de 2026). Rec. 12m = últimos 12 meses reportados, onde coletado; para empresas em crescimento acelerado (NVIDIA, memória) a diferença é grande. Lucro (FY) = lucro líquido do mesmo ano fiscal da receita, com o período indicado na célula (ex.: 2025, 26/jan = ano fiscal encerrado em janeiro de 2026). Lucro 12m = últimos 12 meses reportados, onde coletado. Valores em <span style="color:var(--valc);font-weight:600;font-style:italic">âmbar itálico</span> com "aval." são avaliações da última rodada de empresas privadas (OpenAI, Anthropic, xAI, ByteDance, DeepSeek etc.), não valor de mercado em bolsa; entram na ordenação da coluna. Barra azul = valor de mercado proporcional (escala de raiz quadrada, para as pequenas ficarem visíveis); em azul escuro, as acima de US$ 1 tri. Passe o mouse no nome, no plano ou no backlog para ver o texto completo. * passe o mouse no valor de backlog para ver o que ele representa (RPO, backlog de servidores, compromissos de compute). Para OpenAI o número é a soma dos contratos anunciados, não um dado oficial.</p>
+
+<h2>Empresas por elo da cadeia</h2>
+<p class="note">Receita = último ano fiscal fechado. Projeção = consenso de analistas ou guidance da empresa para o ano fiscal corrente e o seguinte. Valor de mercado no fechamento de 14/10/2026 (ações asiáticas caíram de 7% a 15% em 15/10; o valor do dia 15 está indicado onde foi coletado). "% IA" = parte da receita ligada a IA ou data center quando a empresa divulga.</p>
+<div id="tables"></div>
+
+<h2>Capex agregado dos hyperscalers: projeções (US$ bi)</h2>
+<div class="tablebox"><table style="min-width:0"><tr><th>Fonte</th><th class="num">2025</th><th class="num">2026</th><th class="num">2027</th><th class="num">2028</th><th class="num">2030</th><th>Escopo</th></tr>
+<tr><td>Guidance das empresas (soma)</td><td class="num">416</td><td class="num">660-690</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td>MSFT, GOOGL, AMZN, META, ORCL</td></tr>
+<tr><td>Consenso por empresa (CNBC, abr/26)</td><td class="num">—</td><td class="num">—</td><td class="num">~1.000</td><td class="num">—</td><td class="num">—</td><td>GOOGL 285, AMZN 257, MSFT 208, META 186 + ORCL</td></tr>
+<tr><td>Goldman Sachs</td><td class="num">—</td><td class="num">~780</td><td class="num">1.200</td><td class="num">—</td><td class="num">—</td><td>5 hyperscalers; +54% em 2027</td></tr>
+<tr><td>UBS</td><td class="num">492</td><td class="num">1.009</td><td class="num">1.447</td><td class="num">1.619</td><td class="num">—</td><td>hyperscalers; ~4,1 tri acumulado 2026-28</td></tr>
+<tr><td>Morgan Stanley</td><td class="num">—</td><td class="num">—</td><td class="num">880</td><td class="num">1.060</td><td class="num">—</td><td>hyperscalers</td></tr>
+<tr><td>Dell'Oro</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">1.700</td><td>capex mundial de data center em 2030</td></tr>
+<tr><td>McKinsey</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">5.200 acum.</td><td>infra de data center para IA, acumulado até 2030</td></tr>
+</table></div>
+<p class="note">Capex 2025 realizado: Microsoft 65 (FY25), Alphabet 91, Amazon 132, Meta 72, Oracle 56 (FY26). As projeções de 2027 em diante são de analistas, não guidance; a dispersão entre casas (880 bi a 1,45 tri para 2027) mostra o grau de incerteza.</p>
+</section>
+<section id="tab-tamanho" hidden>
+<div class="filters" id="tmctl">
+  <span class="lbl">Tamanho por</span>
+  <button type="button" data-k="size" data-v="mcap" class="on">Valor de mercado</button><button type="button" data-k="size" data-v="rev">Receita (último FY)</button>
+  <span class="lbl">Agrupar por</span>
+  <button type="button" data-k="group" data-v="col" class="on">Elo da cadeia</button><button type="button" data-k="group" data-v="cc">País</button>
+  <span class="lbl">Cor</span>
+  <button type="button" data-k="color" data-v="cat" class="on">País / elo</button><button type="button" data-k="color" data-v="growth">Crescimento 2026e</button>
+</div>
+<p class="note" id="tmnote" style="margin:4px 0 8px"></p>
+<div class="tm" id="tm"></div>
+<div class="legend" id="tmlegend"></div>
+</section>
+<h2>Notas e fontes</h2>
+<p class="note">Câmbio usado pelos levantamentos: USD/KRW 1.340, USD/TWD 32,2 a 32,4, USD/JPY 158, USD/CNY 6,69, EUR/USD 1,12. Consenso de analistas via StockAnalysis e Yahoo Finance; valores de mercado via CompaniesMarketCap e StockAnalysis. Laboratórios privados: avaliação da última rodada e receita anualizada divulgada pela imprensa (OpenAI reconhece só sua parte das vendas via parceiros; Anthropic reconhece bruto, o que infla a comparação). Itens marcados "n/v" vieram só de agregadores e não foram confirmados em fonte primária. Não é recomendação de investimento.</p>
+<details><summary>Fontes principais (seleção)</summary><div class="src" id="src"></div></details>
+</div>
+
+<script>
+// ---------- DADOS ----------
+// col: 0 equipamentos, 1 fundição/memória, 2 chips, 3 servidores/rede/energia, 4 nuvem/neoclouds, 5 labs
+// rev = último FY; p1/p2 = projeção ano atual/próximo; mcap US$ bi (14/10/2026); ai = % receita IA; cc = país
+const N = [
+// 0 equipamentos
+{id:"ASML",cc:"eu",col:0,name:"ASML",rev:36.6,fy:"2025",p1:49.9,p2:61.2,ni:10.7,mcap:688,ai:"EUV 49% dos sistemas",note:"Guidance 2026 €44-45 bi; diz que oferta 2027-28 não atende a demanda"},
+{id:"AMAT",cc:"us",col:0,name:"Applied Materials",rev:28.4,fy:"FY25 out",p1:32.5,p2:40,ni:7.0,mcap:405,ai:"n/d",note:"Crescimento por DRAM/HBM e packaging"},
+{id:"LRCX",cc:"us",col:0,name:"Lam Research",rev:23.2,fy:"FY26 jun",p1:30.8,p2:null,ni:null,mcap:400,ai:"n/d",note:"FY27 consenso +29%"},
+{id:"KLAC",cc:"us",col:0,name:"KLA",rev:13.6,fy:"FY26 jun",p1:17.9,p2:null,ni:4.8,mcap:257,ai:"n/d"},
+{id:"TEL",cc:"jp",col:0,name:"Tokyo Electron",rev:15.5,fy:"FY26 mar",p1:19,p2:null,ni:3.6,mcap:149,ai:"n/d",note:"Meta ≥¥3 tri no ano; mcap 15/10 após queda de 7,8%"},
+{id:"ATE",cc:"jp",col:0,name:"Advantest",rev:7.1,fy:"FY26 mar",p1:10.9,p2:null,ni:2.4,mcap:158,ai:"68% testadores SoC",note:"FY27 revisado +52%; mcap 15/10 após queda de 15%"},
+{id:"DISCO",cc:"jp",col:0,name:"Disco",rev:2.8,fy:"FY26 mar",p1:null,p2:null,ni:0.86,mcap:36.6,ai:"n/d"},
+{id:"LSRT",cc:"jp",col:0,name:"Lasertec",rev:1.5,fy:"FY26 jun",p1:1.8,p2:null,ni:null,mcap:22.3,ai:"n/d"},
+// 1 fundição e memória
+{id:"TSMC",cc:"tw",col:1,name:"TSMC",rev:118.3,fy:"2025",p1:169.8,p2:230.7,ni:52.7,mcap:2230,ai:"HPC 68%; aceleradores ~high-teens%",note:"3T26 US$ 46,7 bi (+51%); capex 2026 US$ 60-64 bi; LTM US$ 153 bi"},
+{id:"SSNLF",cc:"kr",col:1,name:"Samsung Electronics",rev:249,fy:"2025",p1:530,p2:731,ni:33,mcap:998,ai:"DS 74% da receita (2T26); HBM share 33%",note:"3T26 preliminar: receita US$ 145 bi, lucro op. US$ 80 bi (+783%); caiu 9,5% em 15/10"},
+{id:"HXSCL",cc:"kr",col:1,name:"SK hynix",rev:72.5,fy:"2025",p1:257,p2:397,ni:32.1,mcap:686,ai:"HBM share 50%; DRAM+HBM 73%",note:"2T26 margem op. 76%; HBM 2026 esgotado; ADR Nasdaq jul/26; caiu 11% em 15/10"},
+{id:"MU",cc:"us",col:1,name:"Micron",rev:133.2,fy:"FY26 ago",p1:274.5,p2:null,ni:85,mcap:1034,ai:"Data center ~63%; HBM 30%",note:"Guidance 1T FY27 US$ 61,5 bi; LTAs US$ 32 bi"},
+{id:"KIOXIA",cc:"jp",col:1,name:"Kioxia",rev:14.8,fy:"FY25 mar",p1:64,p2:null,ni:3.5,mcap:134,ai:"Data center 66%",note:"1T FY26 receita +415%, margem bruta 80%"},
+{id:"INTC",cc:"us",col:1,name:"Intel",rev:52.9,fy:"2025",p1:63.1,p2:72.4,ni:-0.27,mcap:519,ai:"DCAI 39%",note:"Governo dos EUA ~5,5%, NVIDIA ~4%, SoftBank US$ 2 bi; Apple em 18A (preliminar)"},
+{id:"CXMT",cc:"cn",col:1,name:"CXMT",rev:29.4,fy:"TTM",p1:50,p2:null,ni:null,mcap:442,ai:"DRAM",note:"IPO jul/26; maior empresa do mercado A; HBM ainda marginal"},
+{id:"SMIC",cc:"cn",col:1,name:"SMIC",rev:9.3,fy:"2025",p1:null,p2:null,ni:null,mcap:78,ai:"n/d",note:"Fabrica Ascend 950 (7nm) e Cambricon"},
+{id:"RAPIDUS",cc:"jp",col:1,name:"Rapidus (privada)",rev:null,fy:"",p1:null,p2:null,ni:null,mcap:null,val:"apoio estatal US$ 14,9 bi",ai:"2nm em 2027"},
+// 2 chips
+{id:"NVDA",cc:"us",col:2,name:"NVIDIA",rev:215.9,fy:"FY26 jan",p1:411.7,p2:692.2,ni:120.1,mcap:5343,ai:"Data center 90-93%",note:"LTM US$ 303 bi; 2T FY27 US$ 96,2 bi (+106%); guidance 3T US$ 108 bi"},
+{id:"AVGO",cc:"us",col:2,name:"Broadcom",rev:63.9,fy:"FY25 nov",p1:106,p2:173.9,ni:23.1,mcap:1652,ai:"IA 31% (FY25) → 56% (3T26)",note:"IA FY26 ~US$ 56 bi; FY27 'acima de US$ 100 bi'; clientes Google, Meta, OpenAI, Anthropic"},
+{id:"AMD",cc:"us",col:2,name:"AMD",rev:34.6,fy:"2025",p1:51,p2:88.9,ni:4.3,mcap:932,ai:"Data center 58%",note:"Meta data center ~US$ 70 bi em 2027"},
+{id:"MRVL",cc:"us",col:2,name:"Marvell",rev:8.2,fy:"FY26 jan",p1:12,p2:18,ni:2.7,mcap:215,ai:"Data center 79%"},
+{id:"ARM",cc:"us",col:2,name:"Arm (SoftBank 87%)",rev:4.9,fy:"FY26 mar",p1:6.1,p2:null,ni:0.9,mcap:254,ai:"royalties DC dobraram"},
+{id:"QCOM",cc:"us",col:2,name:"Qualcomm",rev:44.3,fy:"FY25 set",p1:42.9,p2:44.9,ni:5.5,mcap:184,ai:"DC residual; meta US$ 15 bi em 2029"},
+{id:"MTK",cc:"tw",col:2,name:"MediaTek",rev:18.4,fy:"2025",p1:null,p2:null,ni:null,mcap:205,ai:"ASIC p/ hyperscaler US$ 2 bi no 4T26"},
+{id:"ASE",cc:"tw",col:2,name:"ASE (packaging)",rev:20.6,fy:"2025",p1:null,p2:null,ni:1.3,mcap:91,ai:"n/d"},
+{id:"HUAWEI",cc:"cn",col:2,name:"Huawei (privada)",rev:131.7,fy:"2025",p1:null,p2:null,ni:10.2,mcap:null,val:"chips IA US$ 7,5 bi → 12 bi (2026)",ai:"Ascend 950"},
+{id:"CAMB",cc:"cn",col:2,name:"Cambricon",rev:0.97,fy:"2025",p1:null,p2:null,ni:null,mcap:84,ai:"ByteDance ~80% das vendas"},
+{id:"HYGON",cc:"cn",col:2,name:"Hygon",rev:2.15,fy:"2025",p1:null,p2:null,ni:null,mcap:67,ai:"n/d"},
+// 3 servidores, rede, energia
+{id:"HONHAI",cc:"tw",col:3,name:"Foxconn (Hon Hai)",rev:250,fy:"2025",p1:null,p2:null,ni:5.8,mcap:104,ai:"Cloud 51%; servidores IA >US$ 31 bi; ~40% dos racks"},
+{id:"QUANTA",cc:"tw",col:3,name:"Quanta",rev:65.6,fy:"2025",p1:null,p2:null,ni:2.3,mcap:37.7,ai:"servidores IA 2026e US$ 77 bi"},
+{id:"WIWYNN",cc:"tw",col:3,name:"Wiwynn",rev:29.4,fy:"2025",p1:null,p2:null,ni:1.6,mcap:32.7,ai:"IA >50%"},
+{id:"DELTA",cc:"tw",col:3,name:"Delta Electronics",rev:17.1,fy:"2025",p1:null,p2:null,ni:null,mcap:131,ai:"1S26 +41% por DC"},
+{id:"DELL",cc:"us",col:3,name:"Dell",rev:113.5,fy:"FY26 jan",p1:167,p2:null,ni:5.9,mcap:365,ai:"servidores IA US$ 24,7 bi → 60 bi (FY27)"},
+{id:"SMCI",cc:"us",col:3,name:"Super Micro",rev:39.1,fy:"FY26 jun",p1:68.5,p2:null,ni:2.2,mcap:23.5,ai:"~100%"},
+{id:"HPE",cc:"us",col:3,name:"HPE",rev:34.3,fy:"FY25 out",p1:46.5,p2:null,ni:0.06,mcap:91,ai:"backlog IA US$ 7,6 bi"},
+{id:"CLS",cc:"us",col:3,name:"Celestica",rev:12.4,fy:"2025",p1:20.5,p2:null,ni:0.83,mcap:37,ai:"hyperscalers 81%"},
+{id:"ANET",cc:"us",col:3,name:"Arista",rev:9.0,fy:"2025",p1:12.6,p2:null,ni:3.5,mcap:273,ai:"IA ~29%"},
+{id:"CSCO",cc:"us",col:3,name:"Cisco",rev:63.3,fy:"FY26 jul",p1:72.8,p2:null,ni:13.3,mcap:448,ai:"IA ~6% → 7,5 bi (FY27)"},
+{id:"VRT",cc:"us",col:3,name:"Vertiv",rev:10.2,fy:"2025",p1:14,p2:null,ni:1.3,mcap:91,ai:"~100% DC; backlog US$ 15 bi"},
+{id:"SU",cc:"eu",col:3,name:"Schneider Electric",rev:45,fy:"2025",p1:null,p2:null,ni:4.7,mcap:192,ai:"DC 30%"},
+{id:"ETN",cc:"us",col:3,name:"Eaton",rev:27.4,fy:"2025",p1:null,p2:null,ni:4.1,mcap:168,ai:"pedidos DC +200%"},
+{id:"GEV",cc:"us",col:3,name:"GE Vernova",rev:38.1,fy:"2025",p1:46,p2:null,ni:4.9,mcap:266,ai:"turbinas: ~20% p/ DC; backlog US$ 176 bi"},
+{id:"CEG",cc:"us",col:3,name:"Constellation",rev:25.5,fy:"2025",p1:null,p2:null,ni:2.3,mcap:99,ai:"PPAs nucleares Microsoft, Meta, Google"},
+{id:"VST",cc:"us",col:3,name:"Vistra",rev:17.7,fy:"2025",p1:null,p2:null,ni:0.94,mcap:54.5,ai:"PPAs AWS 1,2 GW, Meta 2,6 GW"},
+{id:"NEE",cc:"us",col:3,name:"NextEra",rev:27.4,fy:"2025",p1:null,p2:null,ni:6.8,mcap:164,ai:"hubs DC 15-30 GW até 2035"},
+{id:"ENR",cc:"eu",col:3,name:"Siemens Energy",rev:43.8,fy:"FY25 set",p1:50.5,p2:null,ni:1.9,mcap:120,ai:"~20% das turbinas p/ DC"},
+// 4 nuvem e neoclouds
+{id:"MSFT",cc:"us",col:4,name:"Microsoft",rev:331.8,fy:"FY26 jun",p1:391.3,p2:null,ni:133.7,mcap:3966,ai:"Azure >US$ 100 bi (+41%)",note:"Capex FY26 US$ 116 bi cash (~175 c/ leases); ~27% da OpenAI"},
+{id:"GOOGL",cc:"us",col:4,name:"Alphabet",rev:402.8,fy:"2025",p1:499.5,p2:620.4,ni:132.2,mcap:4253,ai:"Cloud 2T26 US$ 24,8 bi (+82%); backlog 514 bi",note:"Capex 2026 US$ 195-205 bi; ~15% da Anthropic"},
+{id:"AMZN",cc:"us",col:4,name:"Amazon",rev:716.9,fy:"2025",p1:828.6,p2:949,ni:77.7,mcap:2739,ai:"AWS run-rate US$ 169 bi (+37%); backlog 496 bi",note:"Capex 2026 ~US$ 220 bi; ~21% da Anthropic; US$ 50 bi na OpenAI"},
+{id:"META",cc:"us",col:4,name:"Meta",rev:201,fy:"2025",p1:254.2,p2:306.8,ni:60.5,mcap:1881,ai:"sem nuvem; capex 2026 US$ 130-145 bi"},
+{id:"ORCL",cc:"us",col:4,name:"Oracle",rev:67.4,fy:"FY26 mai",p1:90.4,p2:null,ni:17,mcap:396,ai:"OCI +121%; RPO US$ 664 bi",note:"Capex FY27 US$ 90-95 bi; FCF negativo; ATM US$ 20 bi"},
+{id:"CRWV",cc:"us",col:4,name:"CoreWeave",rev:5.1,fy:"2025e",p1:12.8,p2:null,ni:null,mcap:36.3,ai:"100%; backlog US$ 104-129 bi",note:"Capex 2026 US$ 35-39 bi; dívida ~35 bi"},
+{id:"NBIS",cc:"us",col:4,name:"Nebius",rev:0.9,fy:"2025e",p1:3.2,p2:null,ni:null,mcap:47.2,ai:"100%; backlog ~US$ 40 bi"},
+{id:"BABA",cc:"cn",col:4,name:"Alibaba",rev:153,fy:"FY26 mar",p1:null,p2:null,ni:15.8,mcap:276,ai:"AI Cloud +45%; capex RMB 380 bi/3 anos"},
+{id:"TCEHY",cc:"cn",col:4,name:"Tencent",rev:112.4,fy:"2025",p1:null,p2:null,ni:null,mcap:482,ai:"capex 2T26 +190%"},
+{id:"BIDU",cc:"cn",col:4,name:"Baidu",rev:19.3,fy:"2025",p1:null,p2:null,ni:null,mcap:28,ai:"AI Cloud +50%; Kunlunxin IPO"},
+{id:"BYTE",cc:"cn",col:4,name:"ByteDance (privada)",rev:200,fy:"2025",p1:null,p2:null,ni:null,mcap:null,val:"US$ 480-550 bi",ai:"capex >US$ 30 bi"},
+{id:"SFTBY",cc:"jp",col:4,name:"SoftBank Group",rev:49.4,fy:"FY26 mar",p1:null,p2:null,ni:31.7,mcap:175,ai:"OpenAI ~13% (US$ 64,6 bi); Arm 87%; Stargate 40%"},
+{id:"NTT",cc:"jp",col:4,name:"NTT",rev:91.3,fy:"FY26 mar",p1:95.5,p2:null,ni:null,mcap:89,ai:"plano focado em DC"},
+{id:"CRUSOE",cc:"priv",col:4,name:"Crusoe (privada)",rev:null,fy:"",p1:null,p2:null,ni:null,mcap:null,val:"US$ 30,9 bi (set/26)",ai:"opera Abilene; >6 GW contratados"},
+{id:"LAMBDA",cc:"priv",col:4,name:"Lambda (privada)",rev:null,fy:"",p1:null,p2:null,ni:null,mcap:null,val:"US$ 14,5 bi pré (out/26)",ai:"backlog US$ 50 bi"},
+// 5 labs
+{id:"OPENAI",cc:"priv",col:5,name:"OpenAI",rev:13.1,fy:"2025",p1:50,p2:null,ni:null,mcap:null,val:"US$ 852 bi (mar/26); negocia ~1,4 tri",ai:"run-rate ~US$ 50 bi; meta 70 bi fim-26",note:"2025 real US$ 13,1 bi; Microsoft ~27%, SoftBank ~13%"},
+{id:"ANTH",cc:"priv",col:5,name:"Anthropic",rev:null,fy:"",p1:65,p2:null,ni:null,mcap:null,val:"US$ 965 bi (mai/26); IPO ~2 tri",ai:"run-rate >US$ 65 bi (jul/26)",note:"Amazon ~21%, Alphabet ~15%; US$ 518 bi de compromissos de infra (S-1, n/v)"},
+{id:"XAI",cc:"priv",col:5,name:"xAI (SpaceX)",rev:3.2,fy:"2025",p1:null,p2:null,ni:-6.4,mcap:null,val:"SpaceX IPO US$ 1,75 tri (jun/26)",ai:"Colossus; vende compute à Anthropic"},
+{id:"MISTRAL",cc:"eu",col:5,name:"Mistral",rev:0.4,fy:"ARR",p1:1,p2:null,ni:null,mcap:null,val:"€21 bi (set/26)",ai:"Samsung lidera rodada"},
+{id:"DEEPSEEK",cc:"cn",col:5,name:"DeepSeek",rev:1.0,fy:"run-rate",p1:null,p2:null,ni:null,mcap:null,val:"US$ 74 bi (rodada)",ai:"API"},
+{id:"MOONSHOT",cc:"cn",col:5,name:"Moonshot (Kimi)",rev:null,fy:"",p1:null,p2:null,ni:null,mcap:null,val:"US$ 50 bi; IPO HK",ai:""},
+{id:"ZHIPU",cc:"cn",col:5,name:"Zhipu / Z.AI",rev:1.08,fy:"2025",p1:null,p2:null,ni:null,mcap:30.7,ai:"IPO jan/26"},
+{id:"SSI",cc:"priv",col:5,name:"Safe Superintelligence",rev:0,fy:"",p1:null,p2:null,ni:null,mcap:null,val:"US$ 32 bi",ai:"sem produto"},
+];
+const COLS = ["Equipamentos","Fundição e memória","Chips e design","Servidores, rede e energia","Nuvem e neoclouds","Laboratórios de modelos"];
+// fluxos: f (de: pagador/comprador) -> t (para: recebedor/fornecedor); g = grupo; v = rótulo curto; d = detalhe
+const F = [
+{f:"OPENAI",t:"NVDA",g:"openai",v:"10 GW",d:"OpenAI compra ≥10 GW de sistemas NVIDIA; NVIDIA investe até US$ 100 bi progressivamente (LOI set/25) + US$ 30 bi na rodada de mar/26"},
+{f:"OPENAI",t:"AMD",g:"openai",v:"6 GW",d:"6 GW de Instinct MI450 (2026-30); warrant de até 160 mi ações AMD (~10%) por marcos"},
+{f:"OPENAI",t:"AVGO",g:"openai",v:"10 GW",d:"10 GW de aceleradores customizados a partir do 2S26"},
+{f:"OPENAI",t:"ORCL",g:"openai",v:"US$ 300 bi",d:"Compute OCI, 4,5 GW, 5 anos a partir de 2027 (WSJ set/25)"},
+{f:"OPENAI",t:"MSFT",g:"openai",v:"US$ 250 bi",d:"Azure incremental; Microsoft fica com ~27% e recebe revenue share até 2030"},
+{f:"OPENAI",t:"AMZN",g:"openai",v:"US$ 38 bi + 2 GW",d:"US$ 38 bi/7 anos de GPUs em AWS (nov/25) + 2 GW de Trainium; Amazon investe US$ 50 bi (35 condicionais)"},
+{f:"OPENAI",t:"CRWV",g:"openai",v:"US$ 22,4 bi",d:"Três contratos de compute (11,9 + 4 + 6,5)"},
+{f:"SFTBY",t:"OPENAI",g:"openai",v:"US$ 64,6 bi",d:"Investimento acumulado (~13%), última tranche out/26"},
+{f:"OPENAI",t:"SSNLF",g:"openai",v:"900 mil wafers/mês",d:"LOI Stargate: Samsung e SK hynix fornecem DRAM/HBM (~40% da produção global)"},
+{f:"OPENAI",t:"HXSCL",g:"openai",v:"",d:"LOI Stargate de memória (ver Samsung)"},
+{f:"OPENAI",t:"CRUSOE",g:"openai",v:"Abilene 1,2 GW",d:"Stargate Abilene (Crusoe + Oracle); programa Stargate US$ 500 bi / 10 GW"},
+{f:"OPENAI",t:"CLS",g:"openai",v:"racks",d:"Racks custom dos aceleradores OpenAI/Broadcom; produção em massa 2027"},
+{f:"ANTH",t:"AMZN",g:"anthropic",v:"US$ 100 bi / 10 anos",d:"Compromisso AWS + até 5 GW Trainium; Amazon investiu US$ 8 bi + 5 bi + até 20 bi (~21%)"},
+{f:"ANTH",t:"GOOGL",g:"anthropic",v:"1 mi TPUs + 3,5 GW",d:"Até 1 milhão de TPUs (>1 GW em 2026) + múltiplos GW a partir de 2027; Google investe US$ 10 bi + até 30 bi (n/v)"},
+{f:"ANTH",t:"AVGO",g:"anthropic",v:"TPUs via Broadcom",d:"Broadcom fabrica os TPUs; Anthropic será maior cliente custom em 2027 (1 → 5 GW); US$ 42 bi em conversíveis (out/26)"},
+{f:"ANTH",t:"MSFT",g:"anthropic",v:"US$ 30 bi Azure",d:"Até 1 GW; Microsoft investe até US$ 5 bi"},
+{f:"NVDA",t:"ANTH",g:"anthropic",v:"US$ 10 bi",d:"Investimento da NVIDIA (nov/25)"},
+{f:"ANTH",t:"XAI",g:"anthropic",v:"US$ 1,25 bi/mês",d:"Toda a capacidade do Colossus 1 (>300 MW) até mai/29, >US$ 40 bi"},
+{f:"ANTH",t:"LAMBDA",g:"anthropic",v:"US$ 35 bi",d:"Contrato de compute (set/26)"},
+{f:"ANTH",t:"AMD",g:"anthropic",v:"2 GW",d:"MI450 em racks Helios (1º GW 1S27); AMD investe até US$ 5 bi"},
+{f:"ANTH",t:"CRWV",g:"anthropic",v:"multibilionário",d:"GPUs NVIDIA nos EUA (abr/26)"},
+{f:"META",t:"CRWV",g:"meta",v:"US$ 21 bi",d:"Take-or-pay até 2032"},
+{f:"META",t:"NBIS",g:"meta",v:"até US$ 27 bi",d:"US$ 3 bi + 12 bi firmes + 15 bi condicionais"},
+{f:"META",t:"GOOGL",g:"meta",v:"US$ 10 bi",d:"Google Cloud, 6 anos"},
+{f:"META",t:"AVGO",g:"meta",v:"MTIA >1 GW",d:"Chip próprio co-desenvolvido; múltiplos GW em 2027+"},
+{f:"META",t:"QCOM",g:"meta",v:"CPUs DC",d:"Acordo multi-geração de chips de data center (jun/26)"},
+{f:"META",t:"CEG",g:"energia",v:"1.121 MW",d:"PPA nuclear Clinton, 20 anos, desde jun/27"},
+{f:"META",t:"VST",g:"energia",v:"2.600 MW",d:"PPAs nucleares 20 anos (Perry, Davis-Besse, Beaver Valley)"},
+{f:"MSFT",t:"NBIS",g:"meta",v:"US$ 17,4 bi",d:"Até 2031 (Vineland, NJ)"},
+{f:"MSFT",t:"CEG",g:"energia",v:"835 MW",d:"Religamento de Three Mile Island (Crane), 20 anos, 2S27"},
+{f:"AMZN",t:"VST",g:"energia",v:"1.200 MW",d:"PPA Comanche Peak, 20 anos, a partir de 4T27"},
+{f:"GOOGL",t:"CEG",g:"energia",v:"890 MW",d:"PPA nuclear 20 anos; financia US$ 4,3 bi de expansão (out/26)"},
+{f:"GOOGL",t:"NEE",g:"energia",v:">3,5 GW",d:"Campi de DC em escala GW com geração associada"},
+{f:"NVDA",t:"TSMC",g:"chips",v:"fundição",d:"NVIDIA, AMD, Broadcom, Apple fabricam na TSMC (3nm/2nm, CoWoS); HPC = 68% da receita da TSMC"},
+{f:"AMD",t:"TSMC",g:"chips",v:"",d:"Fundição"},
+{f:"AVGO",t:"TSMC",g:"chips",v:"",d:"Fundição"},
+{f:"NVDA",t:"HXSCL",g:"memoria",v:"HBM4 >50%",d:"SK hynix fornece >50% do HBM da NVIDIA; produção 2026 esgotada"},
+{f:"NVDA",t:"SSNLF",g:"memoria",v:"HBM4 30-40%",d:"HBM3E desde 3T25, HBM4 desde fev/26, HBM4E qualificado out/26"},
+{f:"NVDA",t:"MU",g:"memoria",v:"HBM4 ~18%",d:"Micron 3º fornecedor; LTAs US$ 32 bi; HBM 2026 esgotado"},
+{f:"TSMC",t:"ASML",g:"memoria",v:"EUV",d:"Capex TSMC 2026 US$ 60-64 bi; ASML não atende demanda 2027-28"},
+{f:"HXSCL",t:"ASML",g:"memoria",v:"US$ 8 bi",d:"Maior pedido único de EUV (HBM4), entrega até 2027"},
+{f:"NVDA",t:"HONHAI",g:"chips",v:"~40% dos racks",d:"Montagem GB200/GB300 NVL72 (Foxconn, Quanta, Wiwynn): 70-80 mil racks em 2026"},
+{f:"NVDA",t:"QUANTA",g:"chips",v:"",d:"Montagem de racks"},
+{f:"NVDA",t:"WIWYNN",g:"chips",v:"",d:"Montagem de racks"},
+{f:"NVDA",t:"INTC",g:"chips",v:"US$ 5 bi",d:"Participação ~4% + CPUs x86 com NVLink (fechado dez/25)"},
+{f:"NVDA",t:"MRVL",g:"chips",v:"US$ 2 bi",d:"Investimento; Marvell entra no NVLink Fusion"},
+{f:"NVDA",t:"VRT",g:"chips",v:"referência",d:"Arquiteturas de refrigeração líquida e 800 VDC para Rubin"},
+{f:"AMZN",t:"MRVL",g:"chips",v:"Trainium",d:"Marvell desenha Trainium (AWS), Maia (Microsoft), Axion (Google)"},
+{f:"XAI",t:"SSNLF",g:"chips",v:"US$ 16,5 bi",d:"Tesla → Samsung Foundry: chip AI6 em Taylor/TX até 2033 (mostrado em xAI/SpaceX por falta de nó Tesla)"},
+{f:"AMZN",t:"DELL",g:"chips",v:"servidores IA",d:"Hyperscalers e neoclouds → Dell: pedidos IA US$ 24,4 bi no trimestre, backlog 51 bi"},
+{f:"MSFT",t:"CSCO",g:"chips",v:"US$ 9,3 bi pedidos",d:"Hyperscalers → Cisco: pedidos de infraestrutura de IA FY26"},
+{f:"TCEHY",t:"HUAWEI",g:"china",v:"Ascend 950",d:"Tencent e Alibaba fazem pedidos substanciais; Huawei chips IA US$ 7,5 → 12 bi"},
+{f:"BABA",t:"HUAWEI",g:"china",v:"",d:"Pedidos de Ascend"},
+{f:"BYTE",t:"HUAWEI",g:"china",v:"~US$ 5,6 bi (n/v)",d:"Relato de 350 mil Ascend 950PR em 2026"},
+{f:"BYTE",t:"CAMB",g:"china",v:"~80% das vendas",d:"ByteDance é o cliente dominante da Cambricon"},
+{f:"HUAWEI",t:"SMIC",g:"china",v:"7nm",d:"Fabricação do Ascend 950 (meta 750 mil chips em 2026)"},
+{f:"BABA",t:"NVDA",g:"china",v:"H200 (bloqueado)",d:"EUA liberaram H200 para 10 empresas; Pequim bloqueou na alfândega; vendas <1% do DC"},
+{f:"TCEHY",t:"DEEPSEEK",g:"china",v:"RMB 10 bi",d:"Rodada de US$ 7,4 bi a US$ 52 bi (jun/26); nova rodada a US$ 74 bi"},
+{f:"BABA",t:"MOONSHOT",g:"china",v:"equity",d:"Alibaba, Tencent, Meituan em rodada a US$ 50 bi; IPO em HK"},
+{f:"SSNLF",t:"NVDA",g:"korea",v:"260 mil GPUs",d:"Samsung, SK, Hyundai, Naver e governo coreano compram GPUs NVIDIA (out/25)"},
+{f:"SFTBY",t:"INTC",g:"chips",v:"US$ 2 bi",d:"Participação (set/25)"},
+{f:"GOOGL",t:"MTK",g:"chips",v:"US$ 2 bi (4T26)",d:"ASIC de IA para hyperscaler dos EUA (TPU, não confirmado oficialmente)"},
+{f:"SSNLF",t:"MISTRAL",g:"korea",v:"€3 bi (lidera)",d:"Samsung lidera Série D da Mistral a €21 bi"},
+];
+// Explicações em linguagem simples, chave = "DE>PARA"
+const EXPL = {
+"OPENAI>NVDA": "A OpenAI (dona do ChatGPT) precisa de milhões de chips para treinar e rodar seus modelos, e a NVIDIA é quem fabrica os chips mais usados para isso. O acordo prevê 10 gigawatts de computação, o que equivale à energia de uns 7 milhões de casas e a algo como 4 a 5 milhões de chips. O detalhe é que a NVIDIA vai financiar parte da compra investindo até US$ 100 bi na própria OpenAI, ou seja, empresta o dinheiro que depois volta como venda de chip.",
+"OPENAI>AMD": "A AMD é a principal concorrente da NVIDIA em chips de IA. A OpenAI aceitou comprar 6 gigawatts de chips da AMD a partir de 2026 para não depender de um único fornecedor. Em troca, a AMD deu à OpenAI o direito de comprar até 10% das ações da AMD por um preço simbólico, desde que as metas de entrega sejam cumpridas. É um cliente que vira sócio.",
+"OPENAI>AVGO": "Em vez de comprar só chips prontos, a OpenAI desenhou um chip próprio, e a Broadcom é a empresa que transforma esse desenho em produto e cuida da fabricação. São 10 gigawatts de capacidade a partir do fim de 2026. O Google faz o mesmo com a Broadcom há anos (os chips TPU).",
+"OPENAI>ORCL": "A Oracle constrói e opera data centers gigantes e aluga essa capacidade. A OpenAI contratou US$ 300 bi em cinco anos, a partir de 2027, o maior contrato de nuvem da história. Para cumprir, a Oracle precisa tomar dívida e construir fábricas de computação que ainda não existem, por isso o contrato é visto como o ponto mais arriscado de toda a cadeia.",
+"OPENAI>MSFT": "A Microsoft foi a primeira grande investidora da OpenAI e é dona de cerca de 27% dela. No novo acordo de 2025, a OpenAI se comprometeu a gastar mais US$ 250 bi na nuvem Azure da Microsoft, e segue repassando uma parte da receita (cerca de 20%) até 2030. A Microsoft deixou de ter exclusividade, o que liberou a OpenAI para usar Oracle, Amazon e Google.",
+"OPENAI>AMZN": "A Amazon (AWS) é a maior empresa de nuvem do mundo. A OpenAI contratou US$ 38 bi em sete anos de chips NVIDIA hospedados na AWS e ainda 2 gigawatts do Trainium, o chip próprio da Amazon. No mesmo movimento a Amazon investiu US$ 50 bi na OpenAI (parte condicionada ao IPO) e ganhou o direito de revender os modelos da OpenAI para empresas.",
+"OPENAI>CRWV": "A CoreWeave é uma 'nuvem especializada em IA': só aluga servidores com chips NVIDIA. A OpenAI fechou três contratos que somam US$ 22,4 bi para usar essa capacidade. Para a CoreWeave, a OpenAI é um dos dois maiores clientes (o outro é a Microsoft), e a empresa financia a compra dos chips com dívida lastreada nesses contratos.",
+"SFTBY>OPENAI": "O SoftBank é um conglomerado japonês de investimentos liderado por Masayoshi Son. Ele apostou pesado na OpenAI: US$ 64,6 bi investidos até outubro de 2026, o que dá cerca de 13% da empresa. É o maior acionista depois da Microsoft, e também sócio do projeto Stargate de data centers.",
+"OPENAI>SSNLF": "Para rodar chips de IA é preciso uma memória especial de alta velocidade chamada HBM, que só três empresas no mundo fabricam: Samsung, SK hynix e Micron. A OpenAI assinou uma carta de intenções com as duas coreanas para garantir até 900 mil wafers de memória por mês para o Stargate, o que seria cerca de 40% de toda a produção mundial de DRAM. É uma reserva de fornecimento, não uma compra fechada.",
+"OPENAI>HXSCL": "Mesma carta de intenções do Stargate com a Samsung: a SK hynix, líder mundial em HBM (metade do mercado), reservaria memória para os data centers da OpenAI.",
+"OPENAI>CRUSOE": "A Crusoe é uma empresa que constrói data centers. Ela ergueu o primeiro site do Stargate em Abilene, no Texas, com 1,2 gigawatt, que a Oracle opera e a OpenAI usa. O Stargate é o programa de US$ 500 bi anunciado em janeiro de 2025 por OpenAI, SoftBank, Oracle e o fundo MGX de Abu Dhabi para construir 10 gigawatts de data centers nos EUA.",
+"OPENAI>CLS": "A Celestica é uma montadora canadense de equipamentos. Quando a OpenAI e a Broadcom desenharam um chip próprio, alguém precisa montar os gabinetes (racks) que abrigam esses chips, com refrigeração e rede. Esse alguém é a Celestica, com produção em massa prevista para 2027.",
+"ANTH>AMZN": "A Anthropic (dona do Claude) tem a Amazon como principal sócia e principal fornecedora de nuvem. Ela se comprometeu a gastar mais de US$ 100 bi na AWS em dez anos e a usar até 5 gigawatts do Trainium, o chip de IA da própria Amazon. Em troca, a Amazon já investiu US$ 8 bi e prometeu mais US$ 25 bi conforme metas, ficando com cerca de 21% da empresa.",
+"ANTH>GOOGL": "O Google é o segundo grande sócio da Anthropic (cerca de 15%) e fornece seus chips próprios, os TPUs, que são uma alternativa aos chips da NVIDIA. O acordo dá à Anthropic até 1 milhão de TPUs, mais de 1 gigawatt em 2026, e vários gigawatts adicionais a partir de 2027.",
+"ANTH>AVGO": "Os TPUs do Google são fabricados pela Broadcom. Como a Anthropic vai consumir uma quantidade enorme de TPUs, a Broadcom passou a tratá-la como sua maior cliente de chip sob encomenda em 2027. A Broadcom ainda ajudou a financiar: comprou US$ 42 bi em títulos conversíveis da Anthropic, dinheiro que volta como compra de chip.",
+"ANTH>MSFT": "A Anthropic também contratou US$ 30 bi de nuvem Azure da Microsoft, com opção de até 1 gigawatt, para não depender só de Amazon e Google. A Microsoft investiu até US$ 5 bi na Anthropic e passou a oferecer o Claude dentro dos seus produtos (Copilot, Foundry).",
+"NVDA>ANTH": "A NVIDIA investiu até US$ 10 bi na Anthropic no mesmo pacote com a Microsoft. O objetivo é garantir que a Anthropic, que até então usava sobretudo chips da Amazon e do Google, também rode nos chips da NVIDIA.",
+"ANTH>XAI": "A xAI de Elon Musk construiu o Colossus, um dos maiores data centers de IA do mundo, em Memphis. A Anthropic alugou toda a capacidade do Colossus 1 (mais de 300 megawatts e 220 mil chips) por US$ 1,25 bi por mês até 2029, mais de US$ 40 bi no total. É um concorrente alugando a fábrica do outro porque não há capacidade sobrando no mercado.",
+"ANTH>LAMBDA": "A Lambda é outra nuvem especializada em chips NVIDIA, menor que a CoreWeave. A Anthropic contratou US$ 35 bi de capacidade, o que fez a carteira de pedidos da Lambda saltar de 15 para 50 bi e viabilizou uma nova rodada de investimento e um IPO.",
+"ANTH>AMD": "A Anthropic também diversificou para a AMD: 2 gigawatts de chips MI450 em servidores Helios a partir de 2027. A AMD investiu até US$ 5 bi na Anthropic, repetindo o modelo de cliente que vira sócio.",
+"ANTH>CRWV": "Contrato plurianual da Anthropic com a CoreWeave para usar chips NVIDIA hospedados nos EUA. O valor não foi divulgado, mas foi descrito como multibilionário.",
+"META>CRWV": "A Meta (Facebook, Instagram, WhatsApp) não aluga nuvem para terceiros, só consome. Como sua própria construção de data centers não acompanha a demanda, fechou um contrato take-or-pay de US$ 21 bi com a CoreWeave até 2032: paga mesmo que não use toda a capacidade.",
+"META>NBIS": "A Nebius é uma nuvem de IA de origem europeia (ex-Yandex). A Meta contratou até US$ 27 bi em cinco anos (12 bi firmes mais 15 bi condicionais) para ter capacidade extra de chips NVIDIA.",
+"META>GOOGL": "Mesmo sendo concorrente do Google em anúncios, a Meta contratou mais de US$ 10 bi em seis anos de servidores e armazenamento na nuvem do Google. É sinal de que nenhuma big tech consegue construir sozinha tudo o que precisa.",
+"META>AVGO": "A Meta desenvolve um chip próprio de IA chamado MTIA, com a Broadcom como parceira de projeto e fabricação. A primeira fase é de mais de 1 gigawatt, com vários gigawatts previstos a partir de 2027. A ideia é reduzir a dependência da NVIDIA.",
+"META>QCOM": "A Qualcomm, conhecida por chips de celular, está entrando em chips de data center. A Meta assinou acordo de várias gerações de processadores (CPUs) para seus data centers, um dos primeiros grandes clientes desse novo negócio da Qualcomm.",
+"META>CEG": "Data centers de IA consomem tanta energia que as big techs passaram a contratar usinas inteiras. A Constellation é a maior operadora de usinas nucleares dos EUA. A Meta fechou um contrato de 20 anos pela energia da usina de Clinton (1.121 megawatts) a partir de 2027.",
+"META>VST": "A Vistra é uma geradora de energia dos EUA. A Meta contratou mais de 2.600 megawatts de energia nuclear de três usinas da Vistra por 20 anos, o maior contrato de energia nuclear já assinado por uma empresa de tecnologia.",
+"MSFT>NBIS": "A Microsoft contratou US$ 17,4 bi de capacidade da Nebius até 2031, em um data center em Nova Jersey. Faz parte de um pacote de cerca de US$ 60 bi que a Microsoft fechou com nuvens especializadas (Nebius, Nscale, IREN, Lambda) para acelerar enquanto constrói os próprios data centers.",
+"MSFT>CEG": "Para alimentar seus data centers, a Microsoft financiou a reativação do reator de Three Mile Island, na Pensilvânia, desativado em 2019 e famoso pelo acidente de 1979. Contrato de 20 anos por 835 megawatts, religamento previsto para 2027.",
+"AMZN>VST": "A Amazon contratou 1.200 megawatts da usina nuclear de Comanche Peak, no Texas, por 20 anos a partir do fim de 2027, para abastecer data centers da AWS.",
+"GOOGL>CEG": "O Google contratou 890 megawatts de energia nuclear da Constellation por 20 anos e ainda financia US$ 4,3 bi em obras de expansão e extensão de vida das usinas.",
+"GOOGL>NEE": "A NextEra é a maior empresa de energia renovável dos EUA. O Google fechou parceria para construir campi de data centers com geração de energia própria ao lado, mais de 3,5 gigawatts já em operação ou contratados.",
+"NVDA>TSMC": "A NVIDIA desenha os chips mas não fabrica. Quem fabrica é a TSMC, de Taiwan, a única empresa do mundo capaz de produzir chips tão avançados em escala. O mesmo vale para AMD, Broadcom e Apple. Por isso Taiwan é o ponto único de falha de toda a cadeia: 68% da receita da TSMC vem de computação de alto desempenho.",
+"AMD>TSMC": "A AMD também fabrica todos os seus chips avançados na TSMC.",
+"AVGO>TSMC": "A Broadcom fabrica na TSMC os chips sob encomenda que produz para Google, Meta, OpenAI e Anthropic.",
+"NVDA>HXSCL": "Cada chip de IA da NVIDIA vem acoplado a memória HBM, uma memória empilhada de altíssima velocidade. A SK hynix é a líder (50% do mercado) e fornece mais da metade de toda a HBM que a NVIDIA usa. A produção de 2026 já está toda vendida, por isso a SK hynix tem margem de lucro de 76%.",
+"NVDA>SSNLF": "A Samsung demorou a ser aprovada pela NVIDIA em HBM, mas desde 2025 fornece HBM3E e, desde 2026, HBM4, chegando a 30 a 40% do fornecimento. Foi isso que fez o lucro da Samsung multiplicar por oito em um ano.",
+"NVDA>MU": "A Micron, americana, é a terceira fornecedora de HBM (cerca de 18%). Sua memória para 2026 já está vendida e ela tem US$ 32 bi em contratos de longo prazo assinados com clientes.",
+"TSMC>ASML": "A ASML, holandesa, é a única fabricante das máquinas de litografia EUV, que gravam os circuitos nos chips mais avançados. Cada máquina custa de US$ 200 a 400 milhões. A TSMC é sua maior cliente, e a ASML já avisou que não consegue produzir máquinas suficientes para a demanda de 2027 e 2028.",
+"HXSCL>ASML": "Para aumentar a produção de HBM, a SK hynix fez o maior pedido único da história da ASML: US$ 8 bi em máquinas EUV, com entrega até 2027.",
+"NVDA>HONHAI": "A NVIDIA vende os chips, mas os servidores completos (os racks GB200 e GB300, armários de 1,5 tonelada com 72 chips cada) são montados em Taiwan. A Foxconn, famosa por montar iPhones, faz cerca de 40% desses racks. A previsão é de 70 a 80 mil racks em 2026.",
+"NVDA>QUANTA": "A Quanta é a segunda maior montadora de servidores de IA, com cerca de 1.300 racks por mês. Sua receita de servidores de IA deve dobrar em 2026.",
+"NVDA>WIWYNN": "A Wiwynn é a terceira montadora de racks de IA de Taiwan. Mais da metade de sua receita já vem de produtos de IA.",
+"NVDA>INTC": "A Intel, que dominou os chips de PC por décadas, ficou para trás na IA e passou por crise. Em 2025 a NVIDIA comprou cerca de 4% da Intel por US$ 5 bi e as duas passaram a desenvolver processadores juntas. O governo americano também virou acionista da Intel.",
+"NVDA>MRVL": "A Marvell desenha chips sob encomenda para Amazon, Microsoft e Google. A NVIDIA investiu US$ 2 bi nela e a trouxe para o NVLink Fusion, uma tecnologia de conexão que faz chips de terceiros funcionarem junto com os da NVIDIA.",
+"NVDA>VRT": "Os chips novos esquentam tanto que precisam de refrigeração líquida. A Vertiv fabrica esses sistemas e desenvolve com a NVIDIA os projetos de referência de refrigeração e de energia (800 volts) para a próxima geração de servidores.",
+"AMZN>MRVL": "A Amazon não quer depender só da NVIDIA e desenvolve o próprio chip de IA, o Trainium. Quem ajuda a desenhá-lo é a Marvell. A mesma Marvell trabalha nos chips próprios da Microsoft (Maia) e do Google (Axion).",
+"XAI>SSNLF": "Na verdade esta seta representa a Tesla (que não tem caixa própria no mapa, por isso aparece em xAI/SpaceX, do mesmo dono). A Tesla contratou a Samsung para fabricar seu chip de direção autônoma AI6 numa fábrica nova no Texas, US$ 16,5 bi até 2033. É a maior vitória da divisão de fabricação da Samsung, que tenta concorrer com a TSMC.",
+"AMZN>DELL": "A Dell monta servidores de IA para empresas e nuvens. Só num trimestre recebeu US$ 24,4 bi em pedidos e tem US$ 51 bi na fila. A seta representa os grandes compradores (nuvens e empresas), não só a Amazon.",
+"MSFT>CSCO": "A Cisco fabrica os equipamentos de rede (switches) que conectam milhares de chips dentro de um data center. As grandes nuvens fizeram US$ 9,3 bi em pedidos de equipamentos de IA à Cisco no último ano fiscal. A seta representa os hyperscalers em geral.",
+"TCEHY>HUAWEI": "Como os EUA proíbem a venda dos melhores chips da NVIDIA para a China, as empresas chinesas compram o Ascend, chip de IA da Huawei. Tencent e Alibaba fizeram pedidos grandes do Ascend 950, e a receita de chips de IA da Huawei deve ir de US$ 7,5 bi para 12 bi em 2026.",
+"BABA>HUAWEI": "A Alibaba, maior empresa de nuvem da China, compra chips Ascend da Huawei para seus data centers, além de desenvolver chips próprios.",
+"BYTE>HUAWEI": "A ByteDance (TikTok) é a empresa chinesa que mais gasta com IA. Há relatos de um pedido de cerca de 350 mil chips Ascend em 2026, mas o número não foi confirmado em fonte oficial.",
+"BYTE>CAMB": "A Cambricon é uma fabricante chinesa de chips de IA. A ByteDance responde por cerca de 80% das vendas dela, o que explica por que a Cambricon vale US$ 84 bi com receita de apenas US$ 1,4 bi: o mercado aposta que ela será a 'NVIDIA chinesa'.",
+"HUAWEI>SMIC": "A Huawei desenha o Ascend, mas quem fabrica é a SMIC, a maior fundição de chips da China. A SMIC usa tecnologia de 7 nanômetros, duas gerações atrás da TSMC, porque não tem acesso às máquinas EUV da ASML, bloqueadas pelos EUA.",
+"BABA>NVDA": "Em 2026 os EUA liberaram a venda do chip H200 da NVIDIA para dez empresas chinesas, mas o governo chinês bloqueou as compras na alfândega para forçar o uso de chips nacionais. Resultado: a NVIDIA vendeu menos de 1% da sua receita de data center para a China.",
+"TCEHY>DEEPSEEK": "A DeepSeek é a startup chinesa que surpreendeu o mundo em 2025 com modelos baratos. Na primeira rodada de investimento externo, em 2026, a Tencent colocou cerca de RMB 10 bi (US$ 1,4 bi), com a empresa avaliada em US$ 52 bi; uma nova rodada a US$ 74 bi está em curso.",
+"BABA>MOONSHOT": "A Moonshot é a startup chinesa por trás do modelo Kimi. Alibaba, Tencent e Meituan investiram na rodada que a avaliou em US$ 50 bi, antes de um IPO em Hong Kong.",
+"SSNLF>NVDA": "Nesta seta a Coreia aparece como compradora: Samsung, SK, Hyundai, Naver e o governo coreano anunciaram a compra de 260 mil chips NVIDIA para construir 'fábricas de IA' no país. A Samsung é ao mesmo tempo fornecedora de memória para a NVIDIA e cliente dos chips dela.",
+"SFTBY>INTC": "O SoftBank comprou US$ 2 bi em ações da Intel em 2025, parte de um movimento para apoiar a fabricação de chips nos EUA.",
+"GOOGL>MTK": "A MediaTek, de Taiwan, é conhecida por chips de celular. Em 2026 começou a produzir um chip de IA sob encomenda para uma grande nuvem americana (provavelmente uma versão do TPU do Google), com US$ 2 bi de receita só no último trimestre do ano.",
+"SSNLF>MISTRAL": "A Mistral é a principal startup de IA da Europa, francesa. A Samsung liderou a rodada de €3 bi que avaliou a Mistral em €21 bi, como forma de ter presença em modelos de IA e não só em memória e telas.",
+};
+
+const GROUPS = [["all","Todos"],["openai","Rede OpenAI"],["anthropic","Rede Anthropic"],["meta","Meta e Microsoft"],["memoria","Memória e equipamentos"],["chips","Chips e servidores"],["energia","Energia"],["cc:kr","Coreia"],["cc:tw","Taiwan"],["cc:jp","Japão"],["cc:cn","China"]];
+// fluxo pertence ao filtro: por rede (g) ou por país de qualquer uma das pontas (cc:xx)
+const match = (f,g) => g==="all" || (g.startsWith("cc:") ? (byId[f.f].cc===g.slice(3) || byId[f.t].cc===g.slice(3)) : f.g===g);
+const CC = {us:"EUA",tw:"Taiwan",kr:"Coreia",jp:"Japão",cn:"China",eu:"Europa",priv:"privada"};
+const VALN = {OPENAI:852, ANTH:965, XAI:250, MISTRAL:23.5, DEEPSEEK:74, MOONSHOT:50, SSI:32, BYTE:480, CRUSOE:30.9, LAMBDA:14.5, HUAWEI:null, RAPIDUS:null};
+const VALD = {OPENAI:"rodada mar/26; negocia ~1,4 tri", ANTH:"Série H mai/26; IPO discutido ~2 tri", XAI:"fusão com SpaceX fev/26 (SpaceX IPO 1,75 tri)", MISTRAL:"€21 bi, set/26", DEEPSEEK:"rodada em curso, ago/26", MOONSHOT:"pré-IPO, set/26", SSI:"NVIDIA US$ 5 bi, jul/26", BYTE:"bloco secundário nov/25 (480-550)", CRUSOE:"Série F set/26", LAMBDA:"pré-money, rodada out/26"};
+const REVLTM = {NVDA:303, AMD:41.3, AVGO:89.1, MRVL:9.45, QCOM:44.1, ARM:5.2, INTC:57, TSMC:153.5, SSNLF:362, HXSCL:141, KIOXIA:23.8, MU:133.2, MSFT:331.8, META:201, CXMT:29.4, HONHAI:288, QUANTA:92.5};
+const NILTM = {NVDA:192.9, AMD:6.4, AVGO:38.3, MRVL:2.6, QCOM:9.3, ARM:1.0, INTC:-11.3, TSMC:78.5, SSNLF:101, HXSCL:120.9, KIOXIA:8.7, MU:85, MSFT:133.7, META:60.5};
+const NILTMN = {HXSCL:"inclui ganho de US$ 47 bi na venda da Kioxia", TSMC:"12 meses até set/26", SSNLF:"12 meses até jun/26"};
+const COLS_S = ["Equip.","Fundição/Mem.","Chips","Serv./Energia","Nuvem","Labs"];
+const CC_S = {us:"EUA",tw:"TW",kr:"KR",jp:"JP",cn:"CN",eu:"EU",priv:"priv."};
+const col = c => getComputedStyle(document.documentElement).getPropertyValue("--"+c).trim();
+const fmt = v => v==null ? "—" : (Math.abs(v)>=100 ? Math.round(v).toLocaleString("pt-BR") : v.toLocaleString("pt-BR",{maximumFractionDigits:1}));
+
+// ---------- TILES ----------
+const byId = Object.fromEntries(N.map(n=>[n.id,n]));
+const totalCap = N.reduce((s,n)=>s+(n.mcap||0),0);
+const tiles = [
+ [fmt(totalCap/1000)+" tri","valor de mercado somado (US$), "+N.filter(n=>n.mcap).length+" listadas"],
+ ["5,34 tri","NVIDIA, maior empresa do mapa (US$)"],
+ ["~US$ 660 bi","capex 2026 dos 5 hyperscalers (MSFT, GOOGL, AMZN, META, ORCL)"],
+ ["US$ 1,8 tri","avaliação somada OpenAI + Anthropic (últimas rodadas)"],
+ [F.length,"fluxos mapeados"],
+];
+document.getElementById("tiles").innerHTML = tiles.map(t=>`<div class="tile"><div class="n">${t[0]}</div><div class="l">${t[1]}</div></div>`).join("");
+
+// ---------- MAPA ----------
+const svg = document.getElementById("map");
+const W=1180, colW=W/6, nodeW=150, nodeH=30, TOPY=40;
+const pos = {};
+COLS.forEach((c,i)=>{
+  const items = N.filter(n=>n.col===i);
+  const gap = Math.min(42, (870-TOPY-20)/items.length);
+  items.forEach((n,j)=>{ pos[n.id] = {x: i*colW + (colW-nodeW)/2, y: TOPY + 14 + j*gap}; });
+});
+let html = "";
+COLS.forEach((c,i)=>{ html += `<text class="col-title" x="${i*colW+colW/2}" y="24" text-anchor="middle">${c}</text>`; });
+// flows first (under nodes)
+F.forEach((f,k)=>{
+  const a=pos[f.f], b=pos[f.t]; if(!a||!b) return;
+  const ax=a.x+(a.x<b.x?nodeW:0), ay=a.y+nodeH/2, bx=b.x+(a.x<b.x?0:nodeW), by=b.y+nodeH/2;
+  const dx=(bx-ax)/2;
+  const path = a.x===b.x ? `M${ax},${ay} C${ax+60},${ay} ${bx+60},${by} ${bx},${by}` : `M${ax},${ay} C${ax+dx},${ay} ${bx-dx},${by} ${bx},${by}`;
+  html += `<path class="flow" data-g="${f.g}" data-k="${k}" d="${path}" marker-end="url(#arr)"/>`;
+});
+html = `<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/></marker></defs>` + html;
+N.forEach(n=>{
+  const p=pos[n.id]; const cap = n.mcap!=null ? "US$ "+fmt(n.mcap)+" bi" : (n.val||"");
+  html += `<g class="node" data-id="${n.id}" transform="translate(${p.x},${p.y})"><rect width="${nodeW}" height="${nodeH}" rx="5" stroke="${col(n.cc)}"/><text x="7" y="12.5" font-weight="600">${n.name.length>22?n.name.slice(0,21)+"…":n.name}</text><text class="cap" x="7" y="24.5">${cap}</text></g>`;
+});
+svg.innerHTML = html;
+// filtros
+const fdiv = document.getElementById("filters");
+GROUPS.forEach(([g,l],i)=>{ const b=document.createElement("button"); b.type="button"; b.textContent=l; b.dataset.g=g; if(i===0) b.className="on"; b.onclick=()=>setGroup(g); fdiv.appendChild(b); });
+let selNode=null;
+const esc = t => String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+function relItem(f){ const a=byId[f.f], b=byId[f.t]; const x=EXPL[f.f+">"+f.t]; return `<div class="it"><div class="who">${esc(a.name)} → ${esc(b.name)}</div>${f.v?`<div class="val">${esc(f.v)}</div>`:""}<div class="d">${esc(f.d)}</div>${x?`<div class="x">${esc(x)}</div>`:""}</div>`; }
+function showPanel(title, intro, flows){
+  document.getElementById("ptitle").textContent = title;
+  document.getElementById("pclose").hidden = false; document.getElementById("panel").classList.remove("empty");
+  document.getElementById("pbody").innerHTML = (intro?`<div>${intro}</div>`:"") + (flows.length? `<div class="rel">${flows.map(relItem).join("")}</div>` : `<div style="margin-top:6px">Nenhum fluxo documentado para esta empresa no levantamento.</div>`);
+}
+function selectNode(id){
+  selNode=id; const d=byId[id];
+  fdiv.querySelectorAll("button").forEach(b=>b.classList.remove("on"));
+  const fl = F.map((f,k)=>({...f,k})).filter(f=>f.f===id||f.t===id);
+  const ids=new Set([id]); fl.forEach(f=>{ids.add(f.f);ids.add(f.t);});
+  svg.querySelectorAll(".flow").forEach(p=>{ const on = fl.some(f=>f.k===+p.dataset.k); p.classList.toggle("hi",on); p.classList.toggle("dim",!on); });
+  svg.querySelectorAll(".node").forEach(n=>{ n.classList.toggle("dim", !ids.has(n.dataset.id)); n.classList.toggle("sel", n.dataset.id===id); });
+  svg.querySelectorAll(".flowlabel").forEach(e=>e.remove());
+  fl.forEach(f=>{ if(!f.v) return; const a=pos[f.f], b=pos[f.t]; const x=(a.x+b.x)/2+nodeW/2, y=(a.y+b.y)/2+nodeH/2-3; const t=document.createElementNS("http://www.w3.org/2000/svg","text"); t.setAttribute("class","flowlabel"); t.setAttribute("x",x); t.setAttribute("y",y); t.setAttribute("text-anchor","middle"); t.textContent=f.v; svg.appendChild(t); });
+  const paga = fl.filter(f=>f.f===id), recebe = fl.filter(f=>f.t===id);
+  const intro = `<b>${esc(d.name)}</b> (${CC[d.cc]}, ${COLS[d.col].toLowerCase()}) · receita ${d.fy}: ${d.rev!=null?"US$ "+fmt(d.rev)+" bi":"n/d"} · ${d.mcap!=null?"valor de mercado US$ "+fmt(d.mcap)+" bi":(d.val?"avaliação "+esc(d.val):"")}${d.ai?" · IA: "+esc(d.ai):""}${d.note?"<br>"+esc(d.note):""}<br><span style="font-size:0.8rem">${paga.length} relação(ões) em que paga ou compra · ${recebe.length} em que recebe ou fornece</span>`;
+  showPanel("Relações de "+d.name, intro, [...paga, ...recebe]);
+  if(window.innerWidth<=1100) document.getElementById("panel").scrollIntoView({behavior:"smooth", block:"nearest"});
+}
+function selectFlow(k){
+  const f=F[k];
+  svg.querySelectorAll(".flow").forEach(p=>{ const on=+p.dataset.k===k; p.classList.toggle("hi",on); p.classList.toggle("dim",!on); });
+  svg.querySelectorAll(".node").forEach(n=>{ n.classList.toggle("dim", n.dataset.id!==f.f && n.dataset.id!==f.t); n.classList.remove("sel"); });
+  svg.querySelectorAll(".flowlabel").forEach(e=>e.remove());
+  showPanel(byId[f.f].name+" → "+byId[f.t].name, "", [f]);
+}
+function clearSel(){ setGroup("all"); }
+document.getElementById("pclose").onclick=clearSel;
+if(location.hash && byId[location.hash.slice(1)]) selectNode(location.hash.slice(1));
+svg.addEventListener("click",e=>{ const n=e.target.closest(".node"); const p=e.target.closest(".flow"); if(n) selectNode(n.dataset.id); else if(p) selectFlow(+p.dataset.k); });
+function setGroup(g){
+  selNode=null; svg.querySelectorAll(".node").forEach(n=>n.classList.remove("sel"));
+  if(g==="all"){ document.getElementById("pclose").hidden=true; document.getElementById("panel").classList.add("empty"); document.getElementById("ptitle").textContent="Clique numa empresa e veja aqui as relações dela"; document.getElementById("pbody").innerHTML="Ao clicar numa caixa do mapa, este painel mostra cada acordo, investimento ou fornecimento daquela empresa, com valor, data e uma explicação em linguagem simples. Clique numa seta para ver só aquela relação. Os botões acima listam as relações de cada grupo."; }
+  if(g!=="all"){ const lbl=(GROUPS.find(x=>x[0]===g)||[])[1]||g; const fl=F.filter(f=>match(f,g)); showPanel("Relações: "+lbl, `<span style="font-size:0.8rem">${fl.length} fluxos documentados neste grupo.</span>`, fl); }
+  fdiv.querySelectorAll("button").forEach(b=>b.classList.toggle("on", b.dataset.g===g));
+  const ids = new Set();
+  svg.querySelectorAll(".flow").forEach(p=>{ const on = match(F[+p.dataset.k], g); p.classList.toggle("hi", on && g!=="all"); p.classList.toggle("dim", !on); if(on){ const f=F[+p.dataset.k]; ids.add(f.f); ids.add(f.t);} });
+  svg.querySelectorAll(".node").forEach(n=>n.classList.toggle("dim", g!=="all" && !ids.has(n.dataset.id)));
+  svg.querySelectorAll(".flowlabel").forEach(e=>e.remove());
+  if(g!=="all"){ F.forEach((f,k)=>{ if(!match(f,g)||!f.v) return; const a=pos[f.f], b=pos[f.t]; if(!a||!b) return; const x=(a.x+b.x)/2+nodeW/2, y=(a.y+b.y)/2+nodeH/2-3; const t=document.createElementNS("http://www.w3.org/2000/svg","text"); t.setAttribute("class","flowlabel"); t.setAttribute("x",x); t.setAttribute("y",y); t.setAttribute("text-anchor","middle"); t.textContent=f.v; svg.appendChild(t); }); }
+}
+// tooltip
+const tip=document.getElementById("tip");
+svg.addEventListener("mousemove",e=>{
+  const p=e.target.closest(".flow"), n=e.target.closest(".node");
+  if(p){ const f=F[+p.dataset.k]; tip.innerHTML=`<b>${byId[f.f].name} → ${byId[f.t].name}</b><br>${f.v?f.v+" · ":""}${f.d}`; }
+  else if(n){ const d=byId[n.dataset.id]; tip.innerHTML=`<b>${d.name}</b> (${CC[d.cc]})<br>Receita ${d.fy}: ${d.rev!=null?"US$ "+fmt(d.rev)+" bi":"n/d"} · Projeção: ${d.p1!=null?"US$ "+fmt(d.p1)+" bi":"n/d"}${d.p2!=null?" / "+fmt(d.p2):""}<br>${d.mcap!=null?"Valor de mercado US$ "+fmt(d.mcap)+" bi":(d.val||"")}${d.ai?"<br>IA: "+d.ai:""}${d.note?"<br>"+d.note:""}`; }
+  else { tip.hidden=true; return; }
+  tip.hidden=false; tip.style.left=Math.min(e.clientX+12, window.innerWidth-330)+"px"; tip.style.top=(e.clientY+14)+"px";
+});
+svg.addEventListener("mouseleave",()=>tip.hidden=true);
+
+// ---------- RANKING ÚNICO ----------
+// capex 2026 (guidance, ponto médio, US$ bi) e backlog/compromissos contratados (US$ bi)
+const EXTRA = {
+ // c25 realizado; c26 guidance (ponto médio); c27 consenso de analistas (CNBC 30/abr/26) ou guidance; plano = compromisso plurianual anunciado
+ MSFT:{c25:64.6, c26:116, c27:207.6, plano:"FY27 'cresce a/a' (empresa); analistas 220-262", bl:null},
+ GOOGL:{c25:91.4, c26:200, c27:284.8, plano:"'aumento material' em 2027 (call 2T26)", bl:514, bln:"backlog Google Cloud"},
+ AMZN:{c25:131.8, c26:220, c27:256.5, plano:"sem guidance 2027", bl:496, bln:"backlog AWS"},
+ META:{c25:72.2, c26:137.5, c27:185.6, plano:"'maximizar capacidade 2026-27'", bl:null},
+ ORCL:{c25:55.7, c26:92.5, c27:70, plano:"FY27: 90-95 bruto, ≤70 líquido (pré-pagamentos)", bl:664, bln:"RPO"},
+ CRWV:{c25:null, c26:37, c27:null, plano:"backlog 104-129 bi a entregar até 2032", bl:116, bln:"backlog"},
+ NBIS:{c25:null, c26:22.5, c27:null, plano:"5 GW contratados", bl:40, bln:"Microsoft + Meta"},
+ TSMC:{c25:null, c26:62, c27:null, plano:"capex 2026 recorde (60-64); 2027 n/d", bl:null},
+ MU:{c25:null, c26:27.4, c27:50, plano:"FY26 realizado 27,4; 1S FY27 = 25 (anualizado ~50)", bl:32, bln:"LTAs"},
+ HXSCL:{c25:null, c26:null, c27:null, plano:"capex ~35% da receita (média 3 anos); M15X (HBM) desde 1T26; P&T7 até 2027; Indiana US$ 4,4 bi até 2028", bl:null, bln:"HBM 2026 esgotado"},
+ SSNLF:{c25:null, c26:null, c27:null, plano:"capacidade de HBM +50% em 2026; Taylor/TX (Tesla) 2027+", bl:null},
+ BABA:{c25:null, c26:19, c27:19, plano:"RMB 380 bi em 3 anos (2025-27)", bl:null},
+ TCEHY:{c25:11.8, c26:null, c27:null, plano:"sem guidance; 2T26 +190% a/a", bl:null},
+ BYTE:{c25:null, c26:30, c27:null, plano:"até US$ 70 bi considerados (Bloomberg, n/v)", bl:null},
+ SMIC:{c25:null, c26:7, c27:null, plano:"", bl:null},
+ DELL:{bl:51, bln:"backlog servidores IA"}, GEV:{bl:176, bln:"backlog total"}, HPE:{bl:7.6, bln:"backlog IA"}, VRT:{bl:15, bln:"backlog"}, SU:{bl:28.4, bln:"backlog €25,4 bi"}, ETN:{bl:19.6, bln:"backlog"}, ENR:{bl:181, bln:"backlog €162 bi"},
+ LAMBDA:{bl:50, bln:"backlog"}, CRUSOE:{bl:140, bln:"contratado"},
+ OPENAI:{c25:null, c26:null, c27:null, plano:"meta de compute ~US$ 600 bi acumulados até 2030 (fev/26; antes 1,4 tri em 8 anos); Stargate 500 bi / 10 GW", bl:600, bln:"compute até 2030 (meta revisada)"},
+ ANTH:{plano:"US$ 518 bi de compromissos na década (S-1, n/v); AWS >100 bi/10 anos", bl:518, bln:"compromissos de infra (S-1, n/v)"},
+ SFTBY:{plano:"Stargate 40% de US$ 500 bi; OpenAI US$ 64,6 bi investidos", bl:null},
+};
+const COLSPEC = [
+ ["name","Empresa",false],["cc","País",false],["col","Elo",false],["rev","Receita (FY)",true],["revltm","Rec. 12m",true],["p1","Proj. 26",true],["p2","Proj. 27",true],["ni","Lucro (FY)",true],["niltm","Lucro 12m",true],["mcap","Valor mercado",true],["c25","Capex 25",true],["c26","Capex 26e",true],["c27","Capex 27e",true],["bl","Backlog",true],["plano","Plano plurianual",false]
+];
+let sortKey="mcap", sortDir=-1;
+const ROWS = N.map(n=>{ const e=EXTRA[n.id]||{}; const vn = n.mcap==null ? (VALN[n.id]??null) : null; return {...n, revltm:(REVLTM[n.id]??null), niltm:(NILTM[n.id]??null), valn:vn, mcapsort:(n.mcap??vn??null), c25:e.c25??null, c26:e.c26??null, c27:e.c27??null, bl:e.bl??null, bln:e.bln||"", plano:e.plano||""}; });
+function renderRank(){
+  const rows = ROWS.slice().sort((a,b)=>{
+    const sk = sortKey==="mcap" ? "mcapsort" : sortKey; const va=a[sk], vb=b[sk];
+    if(typeof va==="string"||typeof vb==="string"){ return sortDir*String(va==null?"":va).localeCompare(String(vb==null?"":vb),"pt"); }
+    if(va==null && vb==null) return 0; if(va==null) return 1; if(vb==null) return -1;
+    return sortDir*(va-vb);
+  });
+  const GCLS = {rev:"g-rev gs",revltm:"g-rev",p1:"g-rev",p2:"g-rev",ni:"g-res gs",niltm:"g-res",mcap:"gs",c25:"g-cap gs",c26:"g-cap",c27:"g-cap",bl:"g-bl gs",plano:"g-bl"};
+  const head = COLSPEC.map(([k,l,num])=>`<th class="sortable ${num?"num":""} ${k===sortKey?"sorted":""} ${GCLS[k]||""}" data-k="${k}">${l}${k===sortKey?(sortDir<0?" ▼":" ▲"):""}</th>`).join("");
+  const grp = `<tr class="grp"><th colspan="4"></th><th colspan="4" class="g-rev gs">Receita (US$ bi)</th><th colspan="2" class="g-res gs">Resultado</th><th class="gs">Valor</th><th colspan="3" class="g-cap gs">Capex</th><th colspan="2" class="g-bl gs">Backlog e planos</th></tr>`;
+  const maxCap = Math.max(...ROWS.map(r=>r.mcap||0));
+  const body = rows.map((r,i)=>{
+    const w = r.mcap!=null ? Math.round(100*Math.sqrt(r.mcap/maxCap)) : 0;
+    const capCell = r.mcap!=null ? `<td class="num bar ${r.mcap>=1000?"top":""}" style="--w:${w}%">${fmt(r.mcap)}</td>` : (r.valn!=null ? `<td class="num valp" title="Avaliação privada: ${VALD[r.id]||r.val||""}">${fmt(r.valn)}<small>aval.</small></td>` : `<td class="num" title="${r.val||""}" style="color:var(--muted)">—</td>`);
+    const nm = r.name.length>20 ? r.name.slice(0,19)+"…" : r.name;
+    return `<tr><td class="num">${i+1}</td><td title="${r.name}"><span class="cc" style="background:${col(r.cc)}"></span>${nm}</td><td>${CC_S[r.cc]}</td><td>${COLS_S[r.col]}</td><td class="num g-rev gs" title="Receita do último ano fiscal fechado: ${r.fy}">${fmt(r.rev)}${r.rev!=null&&r.fy?`<small class="per">${r.fy.replace("FY","").replace(" ","/")}</small>`:""}</td><td class="num g-rev" title="Receita dos últimos 12 meses reportados">${fmt(r.revltm)}</td><td class="num g-rev">${fmt(r.p1)}</td><td class="num g-rev">${fmt(r.p2)}</td><td class="num g-res gs" title="Lucro líquido do ano fiscal ${r.fy}">${fmt(r.ni)}${r.ni!=null&&r.fy?`<small class="per">${r.fy.replace("FY","").replace(" ","/")}</small>`:""}</td><td class="num g-res" title="${NILTMN[r.id]||"últimos 12 meses reportados"}">${fmt(r.niltm)}</td>${capCell.replace('<td class="num','<td class="num gs')}<td class="num g-cap gs">${fmt(r.c25)}</td><td class="num g-cap">${fmt(r.c26)}</td><td class="num g-cap">${fmt(r.c27)}</td><td class="num g-bl gs" title="${r.bln}">${fmt(r.bl)}${r.bln?"*":""}</td><td class="plano g-bl" title="${r.plano.replace(/"/g,"&quot;")}">${r.plano.length>70? r.plano.slice(0,68)+"…": r.plano}</td></tr>`;
+  }).join("");
+  const t=document.getElementById("rk"); t.innerHTML = `${grp}<tr><th class="num">#</th>${head}</tr>${body}`;
+  t.querySelectorAll("th.sortable").forEach(th=>th.onclick=()=>{ const k=th.dataset.k; if(k===sortKey) sortDir*=-1; else { sortKey=k; sortDir = (k==="name"||k==="cc"||k==="col") ? 1 : -1; } renderRank(); });
+}
+renderRank();
+
+// ---------- TABELAS ----------
+let th = "";
+COLS.forEach((c,i)=>{
+  const rows = N.filter(n=>n.col===i);
+  th += `<h3>${c}</h3><div class="tablebox"><table><tr><th>Empresa</th><th>País</th><th class="num">Receita</th><th>Ano fiscal</th><th class="num">Proj. atual</th><th class="num">Proj. próximo</th><th class="num">Lucro líq.</th><th class="num">Valor de mercado</th><th>% IA / observação</th></tr>` +
+    rows.map(n=>`<tr><td><span class="cc" style="background:${col(n.cc)}"></span>${n.name}</td><td>${CC[n.cc]}</td><td class="num">${fmt(n.rev)}</td><td>${n.fy||"—"}</td><td class="num">${fmt(n.p1)}</td><td class="num">${fmt(n.p2)}</td><td class="num">${fmt(n.ni)}</td><td class="num">${n.mcap!=null?fmt(n.mcap):(n.val||"—")}</td><td>${[n.ai,n.note].filter(Boolean).join(". ")}</td></tr>`).join("") + `</table></div>`;
+});
+document.getElementById("tables").innerHTML = th;
+
+// ---------- ACORDOS ----------
+const DEALS = [
+["OpenAI","NVIDIA","≥10 GW de sistemas; NVIDIA investe até US$ 100 bi + US$ 30 bi na rodada","set/25, mar/26","openai"],
+["OpenAI","Oracle","Compute OCI 4,5 GW, 5 anos a partir de 2027","US$ 300 bi","openai"],
+["OpenAI","Microsoft","Azure incremental; Microsoft ~27% e revenue share até 2030","US$ 250 bi","openai"],
+["OpenAI","AMD","6 GW MI450 (2026-30); warrant de ~10% da AMD","2026-30","openai"],
+["OpenAI","Broadcom","10 GW de aceleradores customizados a partir do 2S26","out/25","openai"],
+["OpenAI","AWS","GPUs NVIDIA, 7 anos; + 2 GW Trainium; AWS distribuidor do Frontier","US$ 38 bi","openai"],
+["Amazon","OpenAI","Investimento (US$ 35 bi condicionados a IPO/AGI)","US$ 50 bi","openai"],
+["OpenAI","CoreWeave","Três contratos de compute","US$ 22,4 bi","openai"],
+["OpenAI","Cerebras","Inferência, 750 MW até 2028","> US$ 10 bi","openai"],
+["SoftBank","OpenAI","Investimento acumulado, ~13%","US$ 64,6 bi","openai"],
+["Investidores","OpenAI","Rodada a US$ 852 bi post-money (SoftBank, Amazon, NVIDIA, MGX, a16z)","US$ 122 bi","openai"],
+["Stargate (OpenAI, SoftBank, Oracle, MGX)","Sites nos EUA","7 sites, >9 GW até 2029 (Abilene, Shackelford, Doña Ana, Milam, Port Washington, Saline, Lordstown)","US$ 500 bi","openai"],
+["OpenAI","Samsung + SK hynix","LOI de memória: até 900 mil wafers DRAM/mês (~40% da produção global)","out/25","openai"],
+["Anthropic","AWS","Compromisso de 10 anos; até 5 GW de Trainium","> US$ 100 bi","anthropic"],
+["Amazon","Anthropic","US$ 8 bi (2023-24) + US$ 5 bi + até 20 bi por marcos; ~21%","até US$ 33 bi","anthropic"],
+["Anthropic","Google Cloud","Até 1 milhão de TPUs, >1 GW em 2026","dezenas de bi","anthropic"],
+["Anthropic","Google + Broadcom","Múltiplos GW de TPU (~3,5 GW) a partir de 2027","abr/26","anthropic"],
+["Google","Anthropic","Investimento a US$ 350 bi; ~15% (n/v)","US$ 10 + 30 bi","anthropic"],
+["Anthropic","Microsoft","Azure, opção até 1 GW; Microsoft investe até 5 bi, NVIDIA até 10 bi","US$ 30 bi","anthropic"],
+["Anthropic","SpaceX / xAI","Colossus 1 (>300 MW) até mai/29","US$ 1,25 bi/mês","anthropic"],
+["Anthropic","Lambda","Compute","US$ 35 bi","anthropic"],
+["Anthropic","Nscale","Compute alugado (n/v em fonte primária)","~US$ 45 bi","anthropic"],
+["Anthropic","Akamai","CPU, 7 anos","US$ 11,6 bi","anthropic"],
+["Anthropic","AMD","2 GW de MI450 (Helios); AMD investe até US$ 5 bi","jul/26","anthropic"],
+["Broadcom","Anthropic","Notas conversíveis; leases de US$ 125 bi em 5 anos","US$ 42 bi","anthropic"],
+["Investidores","Anthropic","Série H a US$ 965 bi (Altimeter, Sequoia, Coatue, Samsung, SK hynix, Micron)","US$ 65 bi","anthropic"],
+["Meta","CoreWeave","Take-or-pay até 2032","US$ 21 bi","meta"],
+["Meta","Nebius","US$ 12 bi firmes + 15 bi condicionais","até US$ 27 bi","meta"],
+["Meta","Google Cloud","6 anos","> US$ 10 bi","meta"],
+["Meta","Scale AI","49% não votante","US$ 14,3 bi","meta"],
+["Meta","Broadcom","MTIA, >1 GW na 1ª fase","abr/26","meta"],
+["Meta","Constellation / Vistra","PPAs nucleares 1.121 MW + 2.600 MW, 20 anos","2027+","energia"],
+["Microsoft","Nebius / Nscale / IREN","Neoclouds: 17,4 + 23 + 9,7","~US$ 60 bi","meta"],
+["Microsoft","Constellation","Religamento de Three Mile Island, 835 MW, 20 anos","2S27","energia"],
+["Amazon","Vistra / Talen","PPAs nucleares 1.200 MW (Comanche Peak) e até 1.920 MW (Susquehanna)","~US$ 18 bi (Talen)","energia"],
+["Google","Constellation / Kairos / NextEra","890 MW nucleares (financia US$ 4,3 bi); SMR 500 MW até 2035; campi >3,5 GW","out/26","energia"],
+["Data centers","GE Vernova / Siemens Energy","Turbinas a gás: ~20% dos pedidos; slots até 2029-30 esgotados","> US$ 5 bi (GEV 2026)","energia"],
+["NVIDIA","SK hynix / Samsung / Micron","HBM4 para Vera Rubin: ~50% / 30-40% / 18%; produção 2026 esgotada","2026","memoria"],
+["SK hynix","ASML","Maior pedido único de EUV (HBM4)","US$ 8 bi","memoria"],
+["TSMC","ASML","EUV; capex TSMC 2026 US$ 60-64 bi","2026","memoria"],
+["NVIDIA / AMD / Broadcom / Apple","TSMC","Fundição 3nm/2nm e CoWoS; HPC = 68% da TSMC","2026","chips"],
+["NVIDIA","Foxconn / Quanta / Wiwynn / Wistron","Montagem de racks GB200/GB300: 70-80 mil em 2026","2026","chips"],
+["NVIDIA","Intel","Participação ~4% + CPUs x86 com NVLink","US$ 5 bi","chips"],
+["NVIDIA","Marvell","Investimento; NVLink Fusion","US$ 2 bi","chips"],
+["NVIDIA","Groq","Licenciamento e equipe","~US$ 20 bi","chips"],
+["Tesla","Samsung Foundry","Chip AI6 em Taylor/TX, até 2033","US$ 16,5 bi","chips"],
+["Apple","Intel Foundry","Chips M de entrada em 18A a partir de 2027 (preliminar)","jun/26","chips"],
+["Hyperscalers","Dell / Cisco / HPE","Pedidos IA: Dell US$ 24,4 bi/tri (backlog 51 bi); Cisco US$ 9,3 bi; HPE backlog 7,6 bi","2026","chips"],
+["Tencent / Alibaba / ByteDance","Huawei","Ascend 950PR; Huawei chips IA US$ 7,5 → 12 bi","2026","china"],
+["ByteDance","Cambricon","~80% das vendas da Cambricon","2025-26","china"],
+["Alibaba / Tencent / ByteDance","NVIDIA","H200 liberado pelos EUA (75 mil cada), bloqueado por Pequim; <1% do DC","mai-ago/26","china"],
+["Tencent, JD, CATL, fundo nacional","DeepSeek","Rodada a US$ 52 bi; nova a US$ 74 bi","US$ 7,4 bi","china"],
+["Alibaba, Tencent, Meituan","Moonshot","Rodada a US$ 50 bi; IPO em HK","> US$ 2 bi","china"],
+["Samsung, SK, Hyundai, Naver, governo","NVIDIA","260 mil GPUs para AI factories na Coreia","out/25","korea"],
+["OpenAI","SK Telecom / Samsung SDS, C&T","Data centers Stargate Korea (Jeonnam, Pohang, flutuantes)","out/25","korea"],
+["Samsung","Mistral","Lidera Série D a €21 bi","€3 bi","korea"],
+["Governo do Japão + Canon, Sony, NTT, SoftBank","Rapidus","2nm em 2027; apoio estatal acumulado ¥2,35 tri","US$ 14,9 bi","chips"],
+["SoftBank","Ampere / Intel","Aquisição da Ampere (US$ 6,5 bi); 2 bi na Intel","2025","chips"],
+];
+const dfil = document.getElementById("dealfilters");
+GROUPS.forEach(([g,l],i)=>{ const b=document.createElement("button"); b.type="button"; b.textContent=l; b.dataset.g=g; if(i===0) b.className="on"; b.onclick=()=>{ dfil.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b)); renderDeals(g); }; dfil.appendChild(b); });
+function renderDeals(g){
+  const CCNAMES = {kr:/samsung|sk hynix|sk telecom|hyundai|naver|coreia/i, tw:/tsmc|foxconn|quanta|wiwynn|wistron|mediatek|delta|taiwan/i, jp:/softbank|rapidus|kioxia|tokyo electron|advantest|sony|ntt|canon|jap/i, cn:/huawei|alibaba|tencent|bytedance|cambricon|smic|deepseek|moonshot|cxmt|china|pequim/i};
+  const rows = DEALS.filter(d=>g==="all"||d[4]===g||(g.startsWith("cc:") && CCNAMES[g.slice(3)].test(d[0]+" "+d[1])));
+  document.getElementById("deals").innerHTML = `<tr><th>Paga / compra</th><th>Recebe / fornece</th><th>O quê</th><th class="num">Valor / data</th></tr>` + rows.map(d=>`<tr><td>${d[0]}</td><td>${d[1]}</td><td>${d[2]}</td><td class="num">${d[3]}</td></tr>`).join("");
+}
+renderDeals("all");
+
+// ---------- LEITURA ----------
+document.getElementById("leitura").innerHTML = `
+<p><b>Onde está o dinheiro.</b> A receita da cadeia se concentra em três pontos: NVIDIA (US$ 303 bi nos últimos 12 meses, consenso de US$ 412 bi neste ano fiscal e US$ 692 bi no próximo), memória (Samsung, SK hynix e Micron somam consenso de US$ 1,06 tri para 2026, com margens operacionais de 55% a 76%) e TSMC (US$ 153 bi nos últimos 12 meses, 68% em HPC). Os hyperscalers pagam a conta: capex de cerca de US$ 660 bi em 2026 entre Microsoft, Alphabet, Amazon, Meta e Oracle.</p>
+<p><b>Circularidade.</b> Boa parte dos fluxos é circular: NVIDIA investe na OpenAI, que compra GPUs da NVIDIA; Amazon e Google investem na Anthropic, que compromete US$ 100 bi em AWS e milhões de TPUs; Broadcom financia a Anthropic com US$ 42 bi em conversíveis e vende os chips. Oracle tem US$ 664 bi de backlog, mas fluxo de caixa negativo e emissão de ações para financiar o capex. É o ponto de atenção do mapa.</p>
+<p><b>Laboratórios.</b> OpenAI e Anthropic somam US$ 1,8 tri de avaliação com receita anualizada combinada em torno de US$ 115 bi e compromissos de compute acima de US$ 1 tri na década. A Anthropic prepara o maior IPO da história (novembro, em torno de US$ 2 tri).</p>
+<p><b>Ásia.</b> Coreia é o gargalo físico: SK hynix e Samsung controlam ~83% do HBM e a produção de 2026 já está vendida. Taiwan monta quase tudo (Foxconn, Quanta e Wiwynn fazem os racks; TSMC fabrica os chips). Japão vive de equipamentos (Tokyo Electron, Advantest, Disco, Lasertec) e da SoftBank, que detém 13% da OpenAI e 87% da Arm. China corre por fora: Huawei Ascend e Cambricon crescem com a NVIDIA bloqueada pelos dois governos, a CXMT virou a maior empresa do mercado A e os laboratórios (DeepSeek, Moonshot, Zhipu) valem de US$ 30 a 74 bi.</p>
+<p><b>Dia 15/10.</b> As ações asiáticas de IA caíram forte nesse dia (Samsung −9,5%, SK hynix −11%, Advantest −15%). Os valores de mercado aqui são de 14/10, exceto onde indicado.</p>`;
+
+// ---------- FONTES ----------
+const SRC = [
+["NVIDIA 8-K FY26 e 2T FY27","https://www.sec.gov/Archives/edgar/data/1045810/000104581026000019/q4fy26pr.htm"],
+["TSMC 3T26","https://investor.tsmc.com/english/quarterly-results/2026/q3"],
+["Samsung 2T26","https://news.samsungsemiconductor.com/global/samsung-electronics-announces-second-quarter-2026-results/"],
+["SK hynix 2T26","https://news.skhynix.com/en/q2-2026-business-results/"],
+["Micron 4T FY26","https://www.sec.gov/Archives/edgar/data/0000723125/000072312526000018/a2026q4ex991-pressrelease.htm"],
+["Broadcom 3T FY26","https://www.sec.gov/Archives/edgar/data/0001730168/000173016826000076/avgo-08022026x8kxex99.htm"],
+["AMD 2T26","https://ir.amd.com/news-events/press-releases/detail/1295/amd-reports-second-quarter-2026-financial-results"],
+["Intel 2T26","https://www.sec.gov/Archives/edgar/data/0000050863/000005086326000155/q226earningsrelease.htm"],
+["ASML 3T26","https://www.sec.gov/Archives/edgar/data/0000937966/000162828026065813/pressreleasefinancialresul.htm"],
+["Microsoft segmentos FY26","https://www.sec.gov/Archives/edgar/data/0000789019/000119312526380280/d291965dex991.htm"],
+["Alphabet 2T26","https://www.sec.gov/Archives/edgar/data/0001652044/000165204426000066/googexhibit991q22026.htm"],
+["Amazon 2T26","https://www.aboutamazon.com/news/company-news/amazon-earnings-q2-2026-report"],
+["Meta 4T25","https://investor.atmeta.com/investor-news/press-release-details/2026/Meta-Reports-Fourth-Quarter-and-Full-Year-2025-Results/default.aspx"],
+["Oracle 4T FY26","https://www.sec.gov/Archives/edgar/data/0001341439/000119312526265848/orcl-ex99_1.htm"],
+["Microsoft-OpenAI (out/25)","https://blogs.microsoft.com/blog/2025/10/28/the-next-chapter-of-the-microsoft-openai-partnership/"],
+["NVIDIA-OpenAI 10 GW","https://nvidianews.nvidia.com/news/openai-and-nvidia-announce-strategic-partnership-to-deploy-10gw-of-nvidia-systems"],
+["AMD-OpenAI","https://futurumgroup.com/insights/amd-openai-partnership-scale-win-or-execution-risk-at-6-gw/"],
+["OpenAI-Oracle US$ 300 bi","https://intuitionlabs.ai/articles/oracle-openai-300b-deal-analysis"],
+["OpenAI-AWS US$ 38 bi","https://www.aboutamazon.com/news/aws/aws-open-ai-workloads-compute-infrastructure"],
+["OpenAI run-rate (Bloomberg)","https://finance.yahoo.com/technology/ai/articles/openai-expects-70-billion-annualized-014338719.html"],
+["SoftBank conclui US$ 30 bi","https://www.manilatimes.net/2026/10/03/business/foreign-business/softbank-completes-30b-openai-investment/2438078"],
+["Stargate sites (Epoch)","https://epoch.ai/publications/openai-stargate-where-the-us-sites-stand"],
+["Anthropic Série H US$ 65 bi","https://techcrunch.com/2026/05/28/anthropic-raises-65-billion-nears-1t-valuation-ahead-of-ipo/"],
+["Amazon-Anthropic abr/26","https://www.aboutamazon.com/news/company-news/amazon-invests-additional-5-billion-anthropic-ai"],
+["Anthropic-Google-Broadcom","https://www.anthropic.com/news/google-broadcom-partnership-compute"],
+["Microsoft-NVIDIA-Anthropic","https://blogs.nvidia.com/blog/microsoft-nvidia-anthropic-announce-partnership/"],
+["Anthropic-SpaceX Colossus","https://techcrunch.com/2026/05/20/anthropic-will-pay-xai-1-25-billion-per-month-for-compute/"],
+["Anthropic-AMD 2 GW","https://www.cnbc.com/2026/07/22/amd-anthropic-ai-chip-investment.html"],
+["Anthropic-Lambda US$ 35 bi","https://techcrunch.com/2026/10/06/ai-computing-startup-lambda-to-raise-4b-ahead-of-planned-ipo/"],
+["Meta-Broadcom MTIA","https://about.fb.com/news/2026/04/meta-partners-with-broadcom-to-co-develop-custom-ai-silicon/"],
+["Meta-Nebius","https://finance.yahoo.com/news/nebius-signs-ai-capacity-deal-100907683.html"],
+["CoreWeave 2T26","https://finance.yahoo.com/markets/stocks/articles/coreweave-inc-crwv-q2-2026-050033531.html"],
+["HBM share (Counterpoint)","https://counterpointresearch.com/insights/global-dram-and-hbm-market-share"],
+["HBM4 Rubin fornecedores","https://www.trendforce.com/news/2026/03/09/news-samsung-sk%E2%80%AFhynix-reportedly-tapped-as-nvidia-rubin-hbm4-suppliers-shipments-could-start-in-march"],
+["Stargate 900 mil wafers","https://www.trendforce.com/news/2025/10/02/news-openais-stargate-900k-dram-wafers-could-hit-40-of-global-output-led-by-samsung-sk-hynix/"],
+["Samsung 3T26 preliminar","https://en.sedaily.com/finance/2026/10/08/samsung-quarterly-operating-profit-tops-107-trillion-won"],
+["Huawei chips IA (Reuters/FT)","https://www.huaweicentral.com/huawei-hopes-60-hike-in-ai-chips-revenue-this-year-report/"],
+["Cambricon 1S26","https://www.implicator.ai/cambricon-h1-revenue-doubles-china-ai-chips/"],
+["NVIDIA H200 China (Bloomberg)","https://www.bloomberg.com/news/articles/2026-08-26/nvidia-steps-back-into-china-market-with-first-h200-chip-sales"],
+["CXMT IPO","https://technode.com/2026/07/27/cxmt-becomes-chinas-most-valuable-a-share-company-after-8-6-billion-ipo/"],
+["DeepSeek rodada","https://www.pymnts.com/news/artificial-intelligence/2026/deepseek-resumes-funding-round-to-raise-8-billion/"],
+["SoftBank NAV e OpenAI","https://www.investing.com/news/company-news/softbank-q1-fy2026-slides-record-nav-amid-massive-ai-bets-93CH-4840504"],
+["Rapidus financiamento","https://www.rapidus.inc/en/news_topics/information/rapidus-secures-267-6-billion-yen-in-funding-from-japan-government-and-private-sector-companies/"],
+["Tesla-Samsung US$ 16,5 bi","https://www.astutegroup.com/news/general/tesla-secures-16-5-billion-samsung-chip-deal-to-anchor-ai6-production-in-texas/"],
+["Dell servidores IA","https://www.blocksandfiles.com/ai-ml/2026/05/29/dells-extraordinary-ai-server-revenue-acceleration/5248541"],
+["Foxconn 2025","https://www.honhai.com/en-us/press-center/press-releases/latest-news/1978"],
+["GE Vernova 2T26","https://www.sec.gov/Archives/edgar/data/0001996810/000199681026000147/gevpressrelease2q26.htm"],
+["Constellation-Google","https://www.fool.com/investing/2026/10/13/constellation-google-upgrades-vistra-nuclear/"],
+["Vistra PPAs","https://www.world-nuclear-news.org/articles/ppas-support-extended-operations-at-vistra-plants"],
+["Capex 2027 por empresa (CNBC)","https://www.cnbc.com/2026/04/30/ai-boom-big-tech-capital-expenditures-now-seen-topping-1-trillion-in-2027-.html"],
+["Goldman capex 2027 US$ 1,2 tri","https://trendandticker.com/technology/goldman-sachs-hyperscaler-ai-capex-1-2-trillion-2027"],
+["UBS capex 2026-28","https://io-fund.com/ai-stocks/ai-capex-1-trillion-estimates-too-low"],
+["Dell'Oro capex DC 2030","https://www.delloro.com/news/ai-boom-drives-data-center-capex-to-1-7-trillion-by-2030/"],
+["OpenAI compute US$ 600 bi até 2030 (CNBC)","https://www.cnbc.com/2026/02/20/openai-resets-spend-expectations-targets-around-600-billion-by-2030.html"],
+["SK hynix F-1 (capex, fabs)","https://www.sec.gov/Archives/edgar/data/0002120882/000119312526299963/d32785d424b4.htm"],
+["Consensos: StockAnalysis / Yahoo Finance","https://stockanalysis.com/"],
+["Valores de mercado: CompaniesMarketCap","https://companiesmarketcap.com/"],
+];
+document.getElementById("src").innerHTML = SRC.map(s=>`<div>${s[0]}: <a href="${s[1]}" target="_blank" rel="noopener">${s[1].replace(/^https?:\/\//,"").slice(0,70)}</a></div>`).join("");
+
+
+// ---------- TREEMAP ----------
+const TM = {size:"mcap", group:"col", color:"cat"};
+const CCOL = {us:"#2b5fb3", tw:"#0e8f6e", kr:"#b23b7a", jp:"#c9821a", cn:"#b83a3a", eu:"#5b5fb5", priv:"#6b7280"};
+const ECOL = ["#5b5fb5","#0e8f6e","#2b5fb3","#c9821a","#b23b7a","#b83a3a"];
+function squarify(items, x, y, w, h, out){
+  let total = items.reduce((a,b)=>a+b.v,0); if(total<=0) return;
+  let i=0;
+  while(i<items.length){
+    const horiz = w >= h; const side = horiz ? h : w;
+    let row=[], rowSum=0, best=Infinity;
+    for(let j=i;j<items.length;j++){
+      const cand=[...row, items[j]]; const cs=rowSum+items[j].v;
+      const len = cs/total*(horiz?w:h);
+      let worst=0; for(const c of cand){ const l=c.v/cs*side; worst=Math.max(worst, Math.max(len/l, l/len)); }
+      if(worst<=best){ row=cand; rowSum=cs; best=worst; } else break;
+    }
+    const len = rowSum/total*(horiz?w:h);
+    let off=0;
+    for(const c of row){ const l=c.v/rowSum*side; if(horiz) out.push({...c,x:x,y:y+off,w:len,h:l}); else out.push({...c,x:x+off,y:y,w:l,h:len}); off+=l; }
+    if(horiz){ x+=len; w-=len; } else { y+=len; h-=len; }
+    total-=rowSum; i+=row.length;
+  }
+}
+function growthColor(g){
+  if(g==null) return "#8a93a3";
+  const t = Math.max(-0.2, Math.min(1, g)); const u = (t+0.2)/1.2;
+  const r = Math.round(u<0.5 ? 200 : 200 - (u-0.5)*2*170), gg = Math.round(u<0.5 ? 60 + u*2*120 : 180 - (u-0.5)*2*40), b = 60;
+  return `rgb(${r},${gg},${b})`;
+}
+function renderTM(){
+  const box=document.getElementById("tm"); const W=box.clientWidth||1500, H=box.clientHeight||760;
+  const val = n => TM.size==="mcap" ? (n.mcap ?? VALN[n.id] ?? null) : n.rev;
+  const items = N.map(n=>({...n, v: val(n)})).filter(n=>n.v!=null && n.v>0);
+  const gkey = n => TM.group==="col" ? n.col : n.cc;
+  const gname = k => TM.group==="col" ? COLS[k] : CC[k];
+  const groups = {}; items.forEach(n=>{ (groups[gkey(n)] = groups[gkey(n)]||[]).push(n); });
+  const glist = Object.entries(groups).map(([k,arr])=>({k, v:arr.reduce((a,b)=>a+b.v,0), arr:arr.sort((a,b)=>b.v-a.v)})).sort((a,b)=>b.v-a.v);
+  const gl=[]; squarify(glist, 0, 0, W, H, gl);
+  let html="";
+  gl.forEach(g=>{
+    html += `<div class="grp" style="left:${g.x}px;top:${g.y}px;width:${g.w}px;height:${g.h}px"><div class="gt">${gname(g.k)} · ${fmt(g.v)}</div></div>`;
+    const HB = g.h>60 ? 18 : 0; const cells=[]; squarify(g.arr, g.x+2, g.y+2+HB, Math.max(0,g.w-4), Math.max(0,g.h-4-HB), cells);
+    cells.forEach(c=>{
+      const gr = (c.p1!=null && c.rev) ? c.p1/c.rev-1 : null;
+      const colr = TM.color==="growth" ? growthColor(gr) : (TM.group==="col" ? CCOL[c.cc] : ECOL[c.col]);
+      const big = c.w>70 && c.h>30, mid = c.w>44 && c.h>18;
+      const tag = c.mcap==null && TM.size==="mcap" ? " (aval.)" : "";
+      html += `<div class="cell" style="left:${c.x}px;top:${c.y}px;width:${c.w}px;height:${c.h}px;background:${colr}" data-id="${c.id}" title="${esc(c.name)} · ${TM.size==="mcap"?"valor":"receita"} US$ ${fmt(c.v)} bi${tag}${gr!=null?" · crescimento 2026e "+(gr*100).toFixed(0)+"%":""}">${mid?`<div class="nm">${esc(big?c.name:(c.name.split(" ")[0]))}</div>`:""}${big?`<div class="vl">${fmt(c.v)}${tag?"*":""}</div>`:""}</div>`;
+    });
+  });
+  box.innerHTML = html;
+  document.getElementById("tmnote").textContent = (TM.size==="mcap" ? "Área proporcional ao valor de mercado em 14/10/2026 (US$ bi); empresas privadas entram pela avaliação da última rodada, marcadas com *. " : "Área proporcional à receita do último ano fiscal fechado (US$ bi); privadas sem receita divulgada ficam de fora. ") + (TM.color==="growth" ? "Cor: crescimento da receita projetada para 2026 sobre o último ano fiscal (verde = cresce muito, vermelho = cai; cinza = sem projeção)." : (TM.group==="col" ? "Cor: país." : "Cor: elo da cadeia.")) + " Clique numa empresa para abrir as relações dela no mapa.";
+  const lg=document.getElementById("tmlegend");
+  if(TM.color==="growth"){ lg.innerHTML = [[-0.2,"≤ −20%"],[0,"0%"],[0.25,"+25%"],[0.5,"+50%"],[1,"≥ +100%"]].map(([g,l])=>`<span style="--c:${growthColor(g)}">${l}</span>`).join("") + `<span style="--c:#8a93a3">sem projeção</span>`; }
+  else if(TM.group==="col"){ lg.innerHTML = Object.entries(CC).map(([k,l])=>`<span style="--c:${CCOL[k]}">${l}</span>`).join(""); }
+  else { lg.innerHTML = COLS.map((l,i)=>`<span style="--c:${ECOL[i]}">${l}</span>`).join(""); }
+}
+document.querySelectorAll("#tmctl button").forEach(b=>b.onclick=()=>{ TM[b.dataset.k]=b.dataset.v; document.querySelectorAll(`#tmctl button[data-k="${b.dataset.k}"]`).forEach(x=>x.classList.toggle("on",x===b)); renderTM(); });
+document.getElementById("tm").addEventListener("click",e=>{ const c=e.target.closest(".cell"); if(!c) return; showTab("mapa"); selectNode(c.dataset.id); });
+window.addEventListener("resize",()=>{ if(!document.getElementById("tab-tamanho").hidden) renderTM(); });
+
+// ---------- ABAS ----------
+function showTab(t){ document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b.dataset.tab===t)); document.getElementById("tab-mapa").hidden = t!=="mapa"; document.getElementById("tab-ranking").hidden = t!=="ranking"; document.getElementById("tab-tamanho").hidden = t!=="tamanho"; if(t==="tamanho") requestAnimationFrame(renderTM); try{ localStorage.setItem("ia_tab",t);}catch(e){} window.scrollTo(0,0); }
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+(function(){ let t=null; if(location.hash==="#ranking") t="ranking"; else if(location.hash==="#tamanho") t="tamanho"; else if(location.hash==="#mapa") t="mapa"; if(!t){ try{ t=localStorage.getItem("ia_tab"); }catch(e){} } if(t==="ranking"||t==="tamanho") showTab(t); })();
+</script>
