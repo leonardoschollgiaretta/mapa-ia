@@ -43,32 +43,38 @@ except OSError:
     st.error("Arquivo do mapa não encontrado (static/mapa_cadeia_ia_2026.html).")
     st.stop()
 
-# O iframe avisa o Streamlit da altura real do conteúdo (protocolo dos
-# componentes), então não há rolagem interna: só a rolagem da página.
-_AUTOSIZE = """
+# components.html ignora mensagens de altura; só um componente DECLARADO
+# (declare_component) recebe "streamlit:setFrameHeight". Por isso o HTML é
+# servido como componente: component/index.html = conteúdo + protocolo.
+_COMP_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "component")
+_PROTO = """
 <script>
 (function(){
+  function msg(type, data){ window.parent.postMessage(Object.assign({isStreamlitMessage: true, type: type}, data || {}), "*"); }
   function send(){
-    var h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight) + 16;
-    window.parent.postMessage({isStreamlitMessage: true, type: "streamlit:setFrameHeight", height: h}, "*");
+    var h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight) + 24;
+    msg("streamlit:setFrameHeight", {height: h});
   }
   var t = null; function agendar(){ clearTimeout(t); t = setTimeout(send, 60); }
+  msg("streamlit:componentReady", {apiVersion: 1});
   window.addEventListener("load", function(){ send(); setTimeout(send, 400); setTimeout(send, 1500); });
   window.addEventListener("resize", agendar);
   document.addEventListener("click", function(){ setTimeout(send, 80); setTimeout(send, 400); });
   if (window.ResizeObserver) new ResizeObserver(agendar).observe(document.body);
   if (window.MutationObserver) new MutationObserver(agendar).observe(document.body, {childList: true, subtree: true, attributes: true});
+  send();
 })();
 </script>
 """
+os.makedirs(_COMP_DIR, exist_ok=True)
+with open(os.path.join(_COMP_DIR, "index.html"), "w", encoding="utf-8") as f:
+    f.write('<!doctype html><html><head><meta charset="utf-8">'
+            '<meta name="viewport" content="width=device-width, initial-scale=1">'
+            '<style>html,body{margin:0;background:#f4f5f7;overflow:hidden}</style></head><body>'
+            + html + _PROTO + '</body></html>')
 
-components.html(
-    '<!doctype html><html><head><meta charset="utf-8">'
-    '<meta name="viewport" content="width=device-width, initial-scale=1">'
-    '<style>html,body{margin:0;background:#f4f5f7;overflow:hidden}</style></head><body>'
-    + html + _AUTOSIZE + '</body></html>',
-    height=1400, scrolling=False,
-)
+_mapa = components.declare_component("mapa_ia", path=_COMP_DIR)
+_mapa(key="mapa_ia")
 
 # ---------- contador (só com ?admin=1) ----------
 if st.query_params.get("admin") == "1":
