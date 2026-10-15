@@ -158,7 +158,7 @@ summary { cursor: pointer; color: var(--accent); }
 <p class="note">Receita (FY) = último ano fiscal fechado, com o período na célula (ex.: "216 26/jan" = ano fiscal encerrado em janeiro de 2026). Rec. 12m = últimos 12 meses reportados, onde coletado; para empresas em crescimento acelerado (NVIDIA, memória) a diferença é grande. Lucro (FY) = lucro líquido do mesmo ano fiscal da receita, com o período indicado na célula (ex.: 2025, 26/jan = ano fiscal encerrado em janeiro de 2026). Lucro 12m = últimos 12 meses reportados, onde coletado. Valores em <span style="color:var(--valc);font-weight:600;font-style:italic">âmbar itálico</span> com "aval." são avaliações da última rodada de empresas privadas (OpenAI, Anthropic, xAI, ByteDance, DeepSeek etc.), não valor de mercado em bolsa; entram na ordenação da coluna. Barra azul = valor de mercado proporcional (escala de raiz quadrada, para as pequenas ficarem visíveis); em azul escuro, as acima de US$ 1 tri. Passe o mouse no nome, no plano ou no backlog para ver o texto completo. * passe o mouse no valor de backlog para ver o que ele representa (RPO, backlog de servidores, compromissos de compute). Para OpenAI o número é a soma dos contratos anunciados, não um dado oficial.</p>
 
 <h2>Empresas por elo da cadeia</h2>
-<p class="note">Receita = último ano fiscal fechado. Projeção = consenso de analistas ou guidance da empresa para o ano fiscal corrente e o seguinte. Valor de mercado no fechamento de 14/10/2026 (ações asiáticas caíram de 7% a 15% em 15/10; o valor do dia 15 está indicado onde foi coletado). "% IA" = parte da receita ligada a IA ou data center quando a empresa divulga.</p>
+<p class="note">Receita = último ano fiscal fechado. Projeção = consenso de analistas ou guidance da empresa para o ano fiscal corrente e o seguinte. Valor de mercado no fechamento de 14/10/2026 (asiáticas: 15/10). "% IA" = parte da receita ligada a IA ou data center quando a empresa divulga.</p>
 <div id="tables"></div>
 
 <h2>Capex agregado dos hyperscalers: projeções (US$ bi)</h2>
@@ -201,14 +201,14 @@ const N = [
 {id:"AMAT",cc:"us",col:0,name:"Applied Materials",rev:28.4,fy:"FY25 out",p1:32.5,p2:40,ni:7.0,mcap:340,ai:"n/d",note:"Crescimento por DRAM/HBM e packaging"},
 {id:"LRCX",cc:"us",col:0,name:"Lam Research",rev:23.2,fy:"FY26 jun",p1:30.8,p2:null,ni:7.27,mcap:342,ai:"n/d",note:"FY27 consenso +29%"},
 {id:"KLAC",cc:"us",col:0,name:"KLA",rev:13.6,fy:"FY26 jun",p1:17.9,p2:null,ni:4.8,mcap:224,ai:"n/d"},
-{id:"TEL",cc:"jp",col:0,name:"Tokyo Electron",rev:15.5,fy:"FY26 mar",p1:19,p2:null,ni:3.6,mcap:166,ai:"n/d",note:"Plano de médio prazo ≥¥3 tri no FY27; guidance 1S FY27 ¥1,62 tri (+37%); mcap 15/10"},
-{id:"ATE",cc:"jp",col:0,name:"Advantest",rev:7.1,fy:"FY26 mar",p1:10.9,p2:null,ni:2.4,mcap:158,ai:"65% do mercado de testadores SoC (CY25); NVIDIA 20% da receita",note:"FY27 revisado +52%; mcap 15/10 após queda de 15%"},
+{id:"TEL",cc:"jp",col:0,name:"Tokyo Electron",rev:15.5,fy:"FY26 mar",p1:19,p2:null,ni:3.6,mcap:166,ai:"n/d",note:"Plano de médio prazo ≥¥3 tri no FY27; guidance 1S FY27 ¥1,62 tri (+37%)"},
+{id:"ATE",cc:"jp",col:0,name:"Advantest",rev:7.1,fy:"FY26 mar",p1:10.9,p2:null,ni:2.4,mcap:158,ai:"65% do mercado de testadores SoC (CY25); NVIDIA 20% da receita",note:"FY27 revisado +52%"},
 {id:"DISCO",cc:"jp",col:0,name:"Disco",rev:2.8,fy:"FY26 mar",p1:null,p2:null,ni:0.86,mcap:36.6,ai:"n/d"},
 {id:"LSRT",cc:"jp",col:0,name:"Lasertec",rev:1.5,fy:"FY26 jun",p1:1.8,p2:null,ni:0.49,mcap:22.3,ai:"n/d"},
 // 1 fundição e memória
 {id:"TSMC",cc:"tw",col:1,name:"TSMC",rev:118.3,fy:"2025",p1:169.8,p2:230.7,ni:52.7,mcap:2130,ai:"HPC 68%; aceleradores ~high-teens%",note:"3T26 US$ 46,7 bi (+51%); capex 2026 US$ 60-64 bi; LTM US$ 153 bi"},
-{id:"SSNLF",cc:"kr",col:1,name:"Samsung Electronics",rev:249,fy:"2025",p1:530,p2:731,ni:33,mcap:998,ai:"DS 74% da receita (2T26); HBM share 33%",note:"3T26 preliminar: receita US$ 145 bi, lucro op. US$ 80 bi (+783%); caiu 9,5% em 15/10"},
-{id:"HXSCL",cc:"kr",col:1,name:"SK hynix",rev:72.5,fy:"2025",p1:257,p2:397,ni:32.1,mcap:686,ai:"HBM share 50%; DRAM+HBM 73%",note:"2T26 margem op. 76%; HBM 2026 esgotado; ADR Nasdaq jul/26; caiu 11% em 15/10"},
+{id:"SSNLF",cc:"kr",col:1,name:"Samsung Electronics",rev:249,fy:"2025",p1:530,p2:731,ni:33,mcap:998,ai:"DS 74% da receita (2T26); HBM share 33%",note:"3T26 preliminar: receita US$ 145 bi, lucro op. US$ 80 bi (+783%)"},
+{id:"HXSCL",cc:"kr",col:1,name:"SK hynix",rev:72.5,fy:"2025",p1:257,p2:397,ni:32.1,mcap:686,ai:"HBM share 50%; DRAM+HBM 73%",note:"2T26 margem op. 76%; HBM 2026 esgotado; ADR Nasdaq jul/26"},
 {id:"MU",cc:"us",col:1,name:"Micron",rev:133.2,fy:"FY26 ago",p1:274.5,p2:null,ni:85,mcap:990,ai:"Data center ~63%; HBM 30%",note:"Guidance 1T FY27 US$ 61,5 bi; LTAs US$ 32 bi"},
 {id:"KIOXIA",cc:"jp",col:1,name:"Kioxia",rev:14.8,fy:"FY25 mar",p1:64,p2:null,ni:3.5,mcap:134,ai:"Data center 66%",note:"1T FY26 receita +415%, margem bruta 80%"},
 {id:"INTC",cc:"us",col:1,name:"Intel",rev:52.9,fy:"2025",p1:63.1,p2:72.4,ni:-0.27,mcap:488,ai:"DCAI 32% (US$ 16,9 bi)",note:"Governo dos EUA ~9,9% (US$ 8,9 bi, ago/25), NVIDIA ~4%, SoftBank US$ 2 bi; Apple em 18A (preliminar); Microsoft (Maia) e AWS no 18A"},
@@ -824,7 +824,7 @@ document.getElementById("leitura").innerHTML = `
 <p><b>Circularidade.</b> Boa parte dos fluxos é circular: a NVIDIA investiu US$ 30 bi na OpenAI, que compra sistemas da NVIDIA (a carta de intenções de US$ 100 bi foi abandonada); Amazon e Google investem na Anthropic, que compromete US$ 100 bi em AWS e milhões de TPUs; Broadcom financia a Anthropic com US$ 42 bi em conversíveis e vende os chips. Oracle tem US$ 664 bi de backlog, mas fluxo de caixa negativo e emissão de ações para financiar o capex. É o ponto de atenção do mapa.</p>
 <p><b>Laboratórios.</b> OpenAI e Anthropic somam US$ 1,8 tri de avaliação com receita anualizada combinada em torno de US$ 115 bi e compromissos de compute acima de US$ 1 tri na década. A Anthropic prepara o maior IPO da história (novembro, em torno de US$ 2 tri).</p>
 <p><b>Ásia.</b> Coreia é o gargalo físico: SK hynix e Samsung controlam ~83% do HBM e a produção de 2026 já está vendida. Taiwan monta quase tudo (Foxconn, Quanta e Wiwynn fazem os racks; TSMC fabrica os chips). Japão vive de equipamentos (Tokyo Electron, Advantest, Disco, Lasertec) e da SoftBank, que detém 13% da OpenAI e 87% da Arm. China corre por fora: Huawei Ascend e Cambricon crescem com a NVIDIA bloqueada pelos dois governos, a CXMT virou a maior empresa do mercado A e os laboratórios (DeepSeek, Moonshot, Zhipu) valem de US$ 30 a 74 bi.</p>
-<p><b>Dia 15/10.</b> As ações asiáticas de IA caíram forte nesse dia (Samsung −9,5%, SK hynix −11%, Advantest −15%). Os valores de mercado aqui são de 14/10, exceto onde indicado.</p>`;
+`;
 
 // ---------- FONTES ----------
 const SRC = [
