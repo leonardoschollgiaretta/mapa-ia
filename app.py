@@ -83,8 +83,16 @@ _mapa(key="mapa_ia")
 
 # ---------- contador (só com ?admin=1) ----------
 if st.query_params.get("admin") == "1":
-    r = acessos.resumo(PAGINA)
+    VERSAO = "2026-10-15c"
+    try:
+        r = acessos.resumo(PAGINA)
+        erro_resumo = None
+    except Exception as e:  # nunca derrubar a página por causa do contador
+        r, erro_resumo = None, f"{type(e).__name__}: {str(e)[:300]}"
     with st.expander("Acessos", expanded=True):
+        st.caption(f"versão {VERSAO} · host: {acessos._host_seguro()}")
+        if erro_resumo:
+            st.code(erro_resumo, language="text")
         if not r or r.get("erro"):
             st.warning("Contador indisponível.")
             if r:
