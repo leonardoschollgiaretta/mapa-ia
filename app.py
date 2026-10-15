@@ -88,8 +88,7 @@ if st.query_params.get("admin") == "1":
         if not r or r.get("erro"):
             st.warning("Contador indisponível.")
             if r:
-                st.code(f"banco: {r['onde']} | host: {r.get('host')}
-{r['erro']}", language="text")
+                st.code(f"banco: {r['onde']} | host: {r.get('host')}" + chr(10) + r['erro'], language="text")
                 if "pooler" not in str(r.get("host", "")) and r["onde"] == "pg":
                     st.info("A URL do Supabase precisa ser a do Session pooler "
                             "(host com 'pooler.supabase.com', porta 6543). A URL direta "
